@@ -1,5 +1,9 @@
 # GitHub Stats:
-![](https://github-readme-stats.shion.dev/api?username=Aeternifrigus&theme=dark&hide_border=false&include_all_commits=false&count_private=false)
+<p align="center">
+  <img src="stats.svg" width="49%" alt="GitHub Stats" />
+  <img src="languages.svg" width="49%" alt="Top Languages" />
+</p>
+
 
 
 # Socials:
