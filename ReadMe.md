@@ -1,7 +1,7 @@
 # GitHub Stats:
 ![](https://github-readme-stats.shion.dev/api?username=Aeternifrigus&theme=dark&hide_border=false&include_all_commits=false&count_private=false)
 ![](https://streak-stats.demolab.com/?user=Aeternifrigus&theme=dark&hide_border=false)
-![](https://github-readme-stats.shion.dev/api/top-langs/?username=Aeternifrigus&theme=dark&hide_border=false&include_all_commits=false&count_private=false&layout= compact)
+![](https://github-readme-stats.shion.dev/api/top-langs/?username=Aeternifrigus&theme=dark&hide_border=false&include_all_commits=false&count_private=false&layout=compact)
 
 # Socials:
 [![Medium](https://img.shields.io/badge/Medium-12100E?logo=medium&logoColor=white)](https://medium.com/@Aeternifrigus) 
