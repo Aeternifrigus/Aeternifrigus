@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aeternifrigus</title>
+<meta name="description" content="Aeternifrigus. Applied mathematics, machine learning systems, essays." />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23C9A064%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M18%205%20L13.2%2055.6%27%20stroke-width%3D%275%27/%3E%3Cpath%20d%3D%27M6.9%2027.2%20L35.2%2022.1%27%20stroke-width%3D%273.6%27/%3E%3Cpath%20d%3D%27M35.2%2022.1%20L13.7%2054.7%27%20stroke-width%3D%272.2%27/%3E%3Cpath%20d%3D%27M6.9%2027.2%20L22%2036.5%27%20stroke-width%3D%272.2%27/%3E%3C/g%3E%3Cpath%20d%3D%27M17.2%2031.6%20L57.6%2057.2%20L56.2%2060.4%20L16.2%2035.6%20Z%27%20fill%3D%27%23C9A064%27/%3E%3Ccircle%20cx%3D%2756.9%27%20cy%3D%2758.8%27%20r%3D%272.6%27%20fill%3D%27%23C9A064%27/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Azeret+Mono:wght@300;400;500&family=Anek+Odia:wdth,wght@75..125,100..800&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0F1719; --plate:#131D20; --plate2:#172428; --rule:#27373B; --rule2:#34484D;
+  --text:#DAD3C4; --muted:#8B948F; --faint:#5A6663;
+  --brass:#C9A064; --brass-d:#8E6F43; --steel:#6E9BB0; --oxblood:#A5473C;
+  --serif:'Cormorant',Georgia,'Times New Roman',serif;
+  --mono:'Azeret Mono',ui-monospace,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.7,.15,1);
+}
+html{scroll-behavior:auto}
+body{background:var(--ink);color:var(--text);font-family:var(--serif);font-size:19px;line-height:1.65;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit}
+::selection{background:var(--brass);color:var(--ink)}
+:focus-visible{outline:1px solid var(--brass);outline-offset:3px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+img{max-width:100%;display:block}
+
+/* ---------- FIXED TERRAIN ---------- */
+#terrain{position:fixed;left:-25vw;top:-25vh;width:150vw;height:150vh;display:block;z-index:0;
+  transition:transform 1.6s var(--ease),opacity 1.2s var(--ease);transform-origin:50% 50%}
+#veil{position:fixed;inset:0;z-index:1;pointer-events:none;background:rgba(15,23,25,.8);opacity:0;transition:opacity 1s var(--ease)}
+body:not([data-view="home"]) #terrain{pointer-events:none}
+body:not([data-view="home"]) #veil{opacity:1}
+body[data-view="about"] #terrain{transform:translate(18vw,12vh) scale(1.15)}
+body[data-view="projects"] #terrain{transform:translate(-20vw,8vh) scale(1.3)}
+body[data-view="writing"] #terrain{transform:translate(14vw,-16vh) scale(1.2)}
+body[data-view="poison"] #terrain{transform:translate(-12vw,-18vh) scale(1.4)}
+body[data-view="music"] #terrain{transform:translate(22vw,-4vh) scale(1.25)}
+#wipe{position:fixed;top:0;bottom:0;width:1px;background:var(--brass);z-index:40;left:100%;pointer-events:none;box-shadow:0 0 18px 2px rgba(201,160,100,.45);opacity:0}
+#wipe.go{animation:wipe .85s var(--ease)}
+@keyframes wipe{0%{left:100%;opacity:1}90%{opacity:1}100%{left:0;opacity:0}}
+
+/* ---------- NAV ---------- */
+nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:1.5rem;padding:.8rem 2.2rem;background:linear-gradient(to bottom,rgba(15,23,25,.95),rgba(15,23,25,.6) 70%,transparent)}
+.emblem{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.emblem svg{width:30px;height:30px;transition:transform 1.2s var(--ease)}
+.emblem:hover svg{transform:scale(1.12) rotate(-6deg)}
+.emblem span{font-size:1.05rem;letter-spacing:.04em}
+.nav-sections{position:relative;display:flex;margin:0 auto;font-family:var(--mono);font-size:.68rem;color:var(--muted);border:1px solid var(--rule2);background:rgba(15,23,25,.85);overflow-x:auto;scrollbar-width:none;max-width:100%}
+.nav-sections::-webkit-scrollbar{display:none}
+.nav-sections a{position:relative;z-index:1;text-decoration:none;padding:.6rem 1rem;white-space:nowrap;transition:color .25s}
+.nav-sections a+a{border-left:1px solid var(--rule)}
+.nav-sections a:hover{color:var(--text)}
+.nav-sections a.on{color:var(--brass)}
+#navInk{position:absolute;top:0;bottom:0;background:rgba(201,160,100,.1);border-bottom:2px solid var(--brass);transition:left .6s var(--ease),width .6s var(--ease),opacity .3s;opacity:0;pointer-events:none}
+.lang-switch{display:flex;gap:.35rem;align-items:center;border:1px solid var(--rule2);padding:.3rem .7rem}
+.lang-switch button{font-family:var(--mono);font-size:.68rem;color:var(--muted);padding:0 .15rem;line-height:1}
+.lang-switch button.active{color:var(--brass)}
+.lang-switch .sep{color:var(--faint);font-size:.55rem}
+.nav-hamburger{display:none;flex-direction:column;gap:4px;padding:.3rem}
+.nav-hamburger span{width:20px;height:1px;background:var(--text)}
+.mobile-menu{position:fixed;inset:0;z-index:70;background:var(--ink);display:none;flex-direction:column;justify-content:center;gap:1.4rem;padding:2.5rem;font-family:var(--mono);font-size:1rem}
+.mobile-menu.open{display:flex}
+.mobile-menu a{text-decoration:none}
+.mobile-close{position:absolute;top:1.2rem;right:1.4rem;font-size:1.2rem}
+
+/* ---------- VIEWS ---------- */
+main{position:relative;z-index:2}
+.view{display:none;min-height:100vh}
+.view.active{display:block;animation:sheetIn .85s var(--ease) both}
+@keyframes sheetIn{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}
+.st>*{opacity:0}
+.view.active .st>*{animation:rise .8s var(--ease) both;animation-delay:calc(.25s + var(--i,0)*70ms)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.sheet{max-width:1320px;margin:0 auto;padding:6.5rem 2.4rem 3rem}
+.sec-head{display:grid;grid-template-columns:5.5rem 1fr auto;align-items:baseline;gap:1rem;padding-bottom:1rem;margin-bottom:2.6rem;border-bottom:1px solid var(--rule)}
+.sec-num{font-family:var(--mono);font-size:.8rem;color:var(--brass)}
+.sec-title{font-weight:300;font-size:clamp(2.4rem,5vw,3.8rem);line-height:1;letter-spacing:-.01em}
+.sec-note{font-style:italic;color:var(--muted);font-size:1.05rem}
+.pager{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.66rem;color:var(--muted)}
+.pager button{display:flex;flex-direction:column;gap:.2rem;text-align:left;padding:.4rem 0}
+.pager button:last-child{text-align:right;align-items:flex-end}
+.pager button strong{font-family:var(--serif);font-weight:400;font-size:1.4rem;color:var(--text);transition:color .2s}
+.pager button:hover strong{color:var(--brass)}
+.pager .keys{color:var(--faint)}
+
+/* ---------- HOME ---------- */
+#home{position:relative;height:100vh;height:100svh;pointer-events:none}
+#home.active{animation:none}
+#home a,#home button{pointer-events:auto}
+.hero-scrim{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 12% 88%,rgba(15,23,25,.94),rgba(15,23,25,.55) 55%,transparent 80%)}
+.hero-content{position:absolute;left:2.4rem;bottom:4.2rem;max-width:760px}
+.hero-tag{font-family:var(--mono);font-size:.7rem;color:var(--steel);margin-bottom:1.2rem}
+h1.hero-name{font-weight:300;font-size:clamp(3.4rem,9vw,7.6rem);line-height:.92;letter-spacing:-.02em;margin-bottom:.8rem}
+h1.hero-name em{font-style:italic;color:var(--brass)}
+h1.hero-name span{display:inline-block;opacity:0;transform:translateY(.4em);animation:letter .9s var(--ease) forwards}
+@keyframes letter{to{opacity:1;transform:none}}
+.hero-phonetic{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-bottom:1.6rem;max-width:62ch}
+.hero-desc{font-size:1.3rem;font-style:italic;font-weight:300;margin-bottom:1.2rem}
+.hero-meta{display:flex;flex-wrap:wrap;gap:.4rem 1.6rem;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.hero-meta a{text-decoration:none;border-bottom:1px solid var(--rule2);padding-bottom:.1rem}
+.hero-meta a:hover{color:var(--brass);border-color:var(--brass)}
+.map-legend{position:absolute;right:2.2rem;bottom:4.2rem;width:290px;font-family:var(--mono);font-size:.62rem;color:var(--muted);background:rgba(15,23,25,.84);border:1px solid var(--rule2);padding:.9rem 1rem;line-height:1.7;pointer-events:auto}
+.map-legend .lg-title{font-family:var(--serif);font-size:1rem;color:var(--text);font-style:italic;margin-bottom:.35rem}
+.map-legend .fx{color:var(--brass)}
+.map-legend .readout{margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--rule);color:var(--text);min-height:3.4em}
+.map-legend .key{display:flex;gap:.9rem;margin-top:.45rem;flex-wrap:wrap}
+.map-legend .key i{display:inline-block;vertical-align:middle;margin-right:.35rem}
+.k-start{width:8px;height:8px;border:1px solid var(--brass)}
+.k-path{width:18px;border-top:1px dashed var(--brass)}
+.k-end{width:8px;height:8px;border-radius:50%;background:var(--oxblood)}
+.home-index{position:absolute;right:2.2rem;top:6rem;display:flex;flex-direction:column;align-items:flex-end;gap:.15rem}
+.home-index a{text-decoration:none;font-size:1.35rem;font-weight:300;display:flex;gap:.8rem;align-items:baseline;color:var(--text);transition:color .2s,transform .4s var(--ease)}
+.home-index a b{font-family:var(--mono);font-weight:400;font-size:.62rem;color:var(--brass)}
+.home-index a:hover{color:var(--brass);transform:translateX(-6px)}
+
+/* ---------- ODIA SIGNATURE ---------- */
+.hero-sig{margin:.2rem 0 1.1rem .15rem;pointer-events:auto;width:max-content}
+.sig{width:clamp(120px,12vw,170px);height:auto;overflow:visible;display:block}
+.sig text{font-family:'Anek Odia','Noto Sans Oriya',sans-serif;font-weight:100;font-stretch:75%;font-variation-settings:'wdth' 75,'wght' 100;font-size:150px}
+.sig .ink{fill:url(#sigFill);fill-opacity:0;stroke:var(--brass);stroke-width:1;stroke-dasharray:1400;stroke-dashoffset:1400;animation:sigDraw 2.4s 1s var(--ease) forwards,sigFill 1.4s 2.3s var(--ease) forwards}
+.sig .rings{fill:#000;opacity:0;transform-box:fill-box;transform-origin:center;animation:sigRings 1.8s 2.8s var(--ease) forwards;transition:opacity .8s var(--ease)}
+.sig .hair{fill:none;stroke:var(--brass-d);stroke-width:.8;stroke-dasharray:1;stroke-dashoffset:1;animation:sigDraw 1.4s 3.1s var(--ease) forwards}
+.sig .sig-rule rect,.sig .sig-rule .min{opacity:0;animation:sigPop .5s var(--ease) forwards}
+.sig .sig-rule rect{animation-delay:3s}.sig .sig-rule .min{animation-delay:4.3s}
+.hero-sig:hover .rings{opacity:1;filter:url(#contour) drop-shadow(0 0 6px rgba(201,160,100,.25))}
+@keyframes sigDraw{to{stroke-dashoffset:0}}
+@keyframes sigFill{to{fill-opacity:1;stroke-opacity:0}}
+@keyframes sigRings{from{opacity:0;transform:scale(.97)}to{opacity:.8;transform:none}}
+@keyframes sigPop{from{opacity:0}to{opacity:1}}
+
+/* ---------- ABOUT ---------- */
+.about-wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:4rem;align-items:start}
+.proof{border-left:2px solid var(--brass-d);padding:.4rem 0 .4rem 1.8rem;font-family:var(--mono);font-size:.84rem;line-height:2.05;min-height:10.5em}
+.proof .caret{display:inline-block;width:.55em;height:1em;background:var(--brass);vertical-align:-.12em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.about-body{margin:2rem 0 2.6rem;font-size:1.35rem;font-weight:300;font-style:italic;color:var(--muted)}
+.art{position:relative;margin:0;background:var(--plate);border:1px solid var(--rule);overflow:hidden}
+.art img{width:100%;height:100%;object-fit:cover;filter:grayscale(.35) sepia(.25) contrast(1.05) brightness(.9);transition:filter .8s var(--ease),transform 1.6s var(--ease)}
+.art:hover img{filter:none;transform:scale(1.03)}
+.art figcaption{font-size:.95rem;font-style:italic;color:var(--muted);padding:.55rem .9rem;border-top:1px solid var(--rule);background:var(--plate)}
+.art figcaption small{display:block;font-family:var(--mono);font-style:normal;font-size:.56rem;color:var(--faint)}
+.art .img-box{aspect-ratio:3/4;overflow:hidden;background:var(--ink)}
+.art.wide .img-box{aspect-ratio:4/3}
+
+/* ---------- PROJECTS ---------- */
+figure.fig{position:relative;background:var(--plate);border:1px solid var(--rule);align-self:start}
+figure.fig::before,figure.fig::after{content:'';position:absolute;width:12px;height:12px;border-color:var(--brass-d);border-style:solid;pointer-events:none}
+figure.fig::before{top:-1px;left:-1px;border-width:1px 0 0 1px}
+figure.fig::after{bottom:-1px;right:-1px;border-width:0 1px 1px 0}
+figure.fig svg{display:block;width:100%;height:auto}
+.fig-bar{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.55rem .9rem;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+.fig-bar b{font-weight:400;color:var(--brass)}
+.fig-btn{font-family:var(--mono);font-size:.62rem;border:1px solid var(--rule2);padding:.3rem .6rem;white-space:nowrap;transition:border-color .2s,color .2s}
+.fig-btn:hover{border-color:var(--brass);color:var(--brass)}
+.fig-cap{padding:0 .9rem .8rem;font-size:.95rem;font-style:italic;color:var(--muted)}
+.fig-split{display:grid;grid-template-columns:1fr 1fr}
+.fig-split>div+div{border-left:1px solid var(--rule)}
+.svgt{font-family:'Azeret Mono',monospace;fill:#8B948F;font-size:10px}
+.svgs{font-family:'Cormorant',Georgia,serif;fill:#DAD3C4}
+.coverage-intro{max-width:64ch;color:var(--muted);margin-bottom:1.2rem;font-size:1.05rem}
+.matrix-wrap{overflow-x:auto;border:1px solid var(--rule);background:rgba(19,29,32,.85)}
+table.matrix{border-collapse:collapse;width:100%;min-width:760px}
+table.matrix th,table.matrix td{padding:.45rem .7rem;border-bottom:1px solid var(--rule)}
+table.matrix thead th{font-family:var(--mono);font-size:.6rem;font-weight:400;color:var(--muted);text-align:center}
+table.matrix thead th:first-child{text-align:left}
+table.matrix tbody tr{cursor:pointer;position:relative;transition:background .2s}
+table.matrix tbody tr:hover{background:var(--plate2)}
+table.matrix tbody tr.sel{background:rgba(201,160,100,.08)}
+table.matrix tbody tr.sel th{color:var(--brass)}
+table.matrix tbody th{text-align:left;font-weight:400;font-size:1.02rem;white-space:nowrap}
+table.matrix tbody th::before{content:'';display:inline-block;width:0;height:1px;background:var(--brass);vertical-align:middle;margin-right:0;transition:width .4s var(--ease),margin .4s var(--ease)}
+table.matrix tbody tr.sel th::before{width:14px;margin-right:.5rem}
+table.matrix td{text-align:center}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--brass);transition:transform .3s var(--ease)}
+tr:hover .dot{transform:scale(1.3)}
+.dot.half{background:transparent;border:1px solid var(--brass-d)}
+.matrix-key{font-family:var(--mono);font-size:.6rem;color:var(--faint);padding:.55rem .8rem}
+.matrix-key .dot{width:7px;height:7px;margin:0 .3rem 0 .8rem;vertical-align:middle}
+.matrix-key .dot:first-child{margin-left:0}
+#plateHost{margin-top:2.6rem;min-height:520px}
+.plate{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:3rem}
+.plate.enter>div:first-child{animation:rise .7s var(--ease) both}
+.plate.enter>figure{animation:rise .7s .08s var(--ease) both}
+.plate-kind{font-family:var(--mono);font-size:.64rem;color:var(--steel);margin-bottom:.6rem}
+.plate h3{font-size:clamp(1.9rem,3vw,2.6rem);line-height:1.05;margin-bottom:1rem;font-weight:400}
+.plate p{max-width:52ch;margin-bottom:1rem}
+.plate .plain{color:var(--muted);font-size:1.02rem;font-style:italic}
+.facts{display:flex;flex-wrap:wrap;gap:.35rem .5rem;margin:1.1rem 0 1.4rem}
+.facts span{font-family:var(--mono);font-size:.6rem;color:var(--muted);border:1px solid var(--rule2);padding:.2rem .5rem}
+.repo-link{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--mono);font-size:.7rem;text-decoration:none;color:var(--brass);border-bottom:1px solid var(--brass-d);padding-bottom:.15rem}
+.repo-link:hover{color:var(--text);border-color:var(--text)}
+.repo-link.primary{font-size:.78rem;background:var(--brass);color:var(--ink);border:0;padding:.6rem 1rem;position:relative;overflow:hidden}
+.repo-link.primary::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.45) 50%,transparent 70%);transform:translateX(-120%);animation:sheen 3.5s 1s infinite}
+@keyframes sheen{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+.links-row{display:flex;flex-wrap:wrap;gap:1.2rem;align-items:center}
+.plate-nav{display:flex;justify-content:space-between;margin-top:1.6rem;font-family:var(--mono);font-size:.66rem;color:var(--muted)}
+.plate-nav button:hover{color:var(--brass)}
+.earlier{margin-top:3.4rem;padding-top:1.6rem;border-top:1px solid var(--rule)}
+.earlier h3{font-weight:400;font-size:1.4rem;margin-bottom:.8rem}
+.earlier-list{display:grid;grid-template-columns:repeat(3,1fr)}
+.earlier-list a{display:block;text-decoration:none;padding:.8rem 1.2rem .8rem 0;border-right:1px solid var(--rule);margin-right:1.2rem}
+.earlier-list a:last-child{border-right:0}
+.earlier-list strong{display:block;font-weight:400;font-size:1.15rem}
+.earlier-list a:hover strong{color:var(--brass)}
+.earlier-list span{font-size:.95rem;color:var(--muted)}
+
+/* ---------- WRITING ---------- */
+.writing-wrap{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);gap:3.5rem;align-items:start}
+.writing-wrap aside{position:sticky;top:6rem}
+.essays{list-style:none;counter-reset:e}
+.essay{border-bottom:1px solid var(--rule)}
+.essay a{position:relative;display:grid;grid-template-columns:3.5rem minmax(0,1fr);gap:1rem;padding:1.35rem 0;text-decoration:none;align-items:baseline;overflow:hidden}
+.essay a::before{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--brass);transform:scaleX(0);transform-origin:left;transition:transform .6s var(--ease)}
+.essay a:hover::before{transform:scaleX(1)}
+.essay .en{font-family:var(--mono);font-size:.7rem;color:var(--faint)}
+.essay .et{font-size:1.6rem;font-weight:400;line-height:1.15;transition:color .2s,transform .5s var(--ease)}
+.essay .ep{color:var(--muted);font-size:1.02rem;max-width:60ch;margin-top:.35rem}
+.essay .em{font-family:var(--mono);font-size:.6rem;color:var(--steel);margin-top:.5rem}
+.essay a:hover .et{color:var(--brass);transform:translateX(6px)}
+
+/* ---------- REPOS + READER ---------- */
+table.matrix td.lang{font-family:var(--mono);font-size:.62rem;color:var(--muted);white-space:nowrap}
+#writingMain [hidden]{display:none}
+.reader .back{display:inline-block;margin-bottom:1.6rem;text-decoration:none}
+.reader h3{font-weight:400;font-size:clamp(2rem,4vw,3rem);line-height:1.08}
+.reader .r-meta{font-family:var(--mono);font-size:.64rem;color:var(--steel);margin:.7rem 0 1.8rem}
+.r-foot{margin-top:2.4rem}
+.prose{max-width:66ch;font-size:1.12rem}
+.prose>*+*{margin-top:1.1em}
+.prose h1,.prose h2,.prose h3,.prose h4{font-weight:400;line-height:1.15;margin-top:1.8em}
+.prose h2{font-size:1.7rem}.prose h3{font-size:1.35rem}
+.prose a{color:var(--brass);text-decoration-color:var(--brass-d)}
+.prose img{border:1px solid var(--rule);margin-inline:auto}
+.prose blockquote{border-left:2px solid var(--brass-d);padding-left:1.2rem;font-style:italic;color:var(--muted)}
+.prose pre,.prose code{font-family:var(--mono);font-size:.8rem;background:var(--plate)}
+.prose pre{padding:1rem;overflow-x:auto;border:1px solid var(--rule)}
+.prose code{padding:.1em .35em}.prose pre code{padding:0}
+.prose ul,.prose ol{padding-left:1.4rem}
+.prose hr{border:0;border-top:1px solid var(--rule)}
+.prose img+em{display:block;font-size:.9rem;color:var(--muted)}
+
+.comments{max-width:66ch;margin-top:3rem;padding-top:1.4rem;border-top:1px solid var(--rule)}
+.comments h4{font-family:var(--mono);font-weight:400;font-size:.64rem;color:var(--steel);margin-bottom:1rem}
+.r-lang{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:-1rem 0 1.6rem;font-family:var(--mono);font-size:.62rem;color:var(--muted)}
+.r-lang select{background:var(--ink);color:var(--text);border:1px solid var(--rule2);font:inherit;padding:.3rem .5rem}
+.r-lang small{color:var(--faint)}
+#gt_el{position:absolute;left:-9999px;top:0}
+body{top:0!important}
+body>.skiptranslate,.goog-te-banner-frame{display:none!important}
+#goog-gt-tt,.goog-tooltip{display:none!important}
+.goog-text-highlight{background:none!important;box-shadow:none!important}
+/* ---------- POISON ---------- */
+.tabs{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--rule);margin-bottom:2rem;position:relative}
+.tabs button{padding:.8rem 1.3rem .7rem 0;margin-right:1.3rem;font-size:1.25rem;color:var(--muted);transition:color .2s}
+.tabs button small{font-family:var(--mono);font-size:.6rem;margin-left:.4rem;color:var(--faint)}
+.tabs button[aria-selected="true"]{color:var(--text)}
+.tabs .ink{position:absolute;bottom:-1px;height:2px;background:var(--brass);transition:left .55s var(--ease),width .55s var(--ease)}
+.shelf-intro{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2rem;align-items:end;margin-bottom:1.2rem}
+.shelf-intro p{color:var(--muted);font-style:italic}
+.sorter{font-family:var(--mono);font-size:.62rem;color:var(--muted);display:flex;gap:.3rem;align-items:center}
+.sorter button{border:1px solid var(--rule2);padding:.3rem .6rem}
+.sorter button[aria-pressed="true"]{border-color:var(--brass);color:var(--brass)}
+.timeline{border:1px solid var(--rule);background:rgba(19,29,32,.8);margin-bottom:1.6rem}
+.timeline svg{display:block;width:100%;height:auto}
+.timeline circle.bk{cursor:pointer;transition:r .2s}
+.timeline circle.bk.hot{fill:var(--brass)}
+.book-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:1.4rem 1.2rem}
+.book{text-align:left;perspective:800px;display:block}
+.book .cover{display:block;position:relative;aspect-ratio:3/4;background:var(--plate);border:1px solid var(--rule);overflow:hidden;transform-style:preserve-3d;transition:transform .5s var(--ease),border-color .3s,box-shadow .5s}
+.book:hover .cover,.book.hot .cover{border-color:var(--brass-d);box-shadow:0 18px 40px -18px rgba(0,0,0,.8)}
+.book .cover svg,.book .cover img{position:absolute;inset:0;width:100%;height:100%}
+.book .cover img{object-fit:cover;filter:grayscale(.4) sepia(.3) brightness(.85);transition:filter .6s}
+.book:hover .cover img{filter:none}
+.book .cover .glint{position:absolute;inset:0;background:radial-gradient(circle at var(--gx,50%) var(--gy,50%),rgba(201,160,100,.18),transparent 55%);opacity:0;transition:opacity .3s;pointer-events:none}
+.book:hover .glint{opacity:1}
+.book .glint{display:block}
+.book .bt{display:block;font-size:1.08rem;line-height:1.2;margin-top:.55rem}
+.book .ba{display:block;font-size:.9rem;font-style:italic;color:var(--muted)}
+.book .by{font-family:var(--mono);font-size:.58rem;color:var(--brass);font-style:normal}
+.book .motif-draw path,.book .motif-draw circle,.book .motif-draw ellipse,.book .motif-draw rect{stroke-dasharray:var(--len,400);stroke-dashoffset:var(--len,400)}
+.book.drawn .motif-draw *{animation:ink 1.4s var(--ease) forwards}
+@keyframes ink{to{stroke-dashoffset:0}}
+.anime-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));border-top:1px solid var(--rule)}
+.anime-grid li{list-style:none;display:grid;grid-template-columns:2.4rem 1fr;align-items:baseline;padding:1rem 0;border-bottom:1px solid var(--rule);font-size:1.5rem;font-weight:300;transition:color .2s,padding .4s var(--ease)}
+.anime-grid li b{font-family:var(--mono);font-weight:400;font-size:.62rem;color:var(--faint)}
+.anime-grid li:hover{color:var(--brass);padding-left:.4rem}
+
+/* drawer */
+#drawerShade{position:fixed;inset:0;z-index:80;background:rgba(8,12,13,.6);opacity:0;pointer-events:none;transition:opacity .4s}
+#drawer{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(520px,100%);background:var(--plate);border-left:1px solid var(--rule2);transform:translateX(102%);transition:transform .6s var(--ease);overflow-y:auto;padding:1.4rem 1.8rem 2rem}
+body.drawer-open #drawer{transform:none}
+body.drawer-open #drawerShade{opacity:1;pointer-events:auto}
+.dr-top{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.62rem;color:var(--muted);margin-bottom:1rem}
+.dr-top button{font-size:1rem;padding:.2rem .4rem}
+.dr-art{position:relative;aspect-ratio:3/4;max-height:52vh;margin:0 auto 1.2rem;border:1px solid var(--rule);background:var(--ink);overflow:hidden}
+.dr-art svg,.dr-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dr-field{font-family:var(--mono);font-size:.64rem;color:var(--steel)}
+#drawer h4{font-weight:400;font-size:2.2rem;line-height:1.05;margin:.3rem 0 .2rem}
+.dr-author{font-style:italic;color:var(--muted);font-size:1.15rem}
+.dr-year{font-family:var(--mono);font-size:.8rem;color:var(--brass);margin:.6rem 0 1rem}
+.dr-desc{font-size:1.2rem;line-height:1.55}
+.dr-credit{font-family:var(--mono);font-size:.56rem;color:var(--faint);margin-top:1.2rem}
+.dr-nav{display:flex;justify-content:space-between;margin-top:1.8rem;padding-top:1rem;border-top:1px solid var(--rule);font-family:var(--mono);font-size:.66rem;color:var(--muted)}
+.dr-nav button:hover{color:var(--brass)}
+
+/* ---------- MUSIC ---------- */
+.deck{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.4fr) minmax(0,1.1fr);gap:0;border:1px solid var(--rule);background:rgba(19,29,32,.9);min-height:640px}
+.deck>div{min-width:0}
+.deck>div+div{border-left:1px solid var(--rule)}
+.crates{list-style:none}
+.crates button{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;width:100%;text-align:left;padding:.95rem 1.1rem;border-bottom:1px solid var(--rule);font-size:1.12rem;line-height:1.2;position:relative;transition:color .2s,padding .4s var(--ease)}
+.crates button::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--brass);transform:scaleY(0);transition:transform .4s var(--ease)}
+.crates button span{font-family:var(--mono);font-size:.6rem;color:var(--faint)}
+.crates button:hover{padding-left:1.4rem}
+.crates button[aria-pressed="true"]{color:var(--brass);background:rgba(201,160,100,.05)}
+.crates button[aria-pressed="true"]::before{transform:scaleY(1)}
+.tracklist header{padding:.9rem 1.1rem;border-bottom:1px solid var(--rule);display:flex;gap:.8rem;align-items:center}
+.tracklist input{flex:1;background:var(--ink);border:1px solid var(--rule2);color:var(--text);font-family:var(--mono);font-size:.72rem;padding:.55rem .7rem}
+.tracklist input:focus{outline:none;border-color:var(--brass)}
+.tracklist .count{font-family:var(--mono);font-size:.6rem;color:var(--faint);white-space:nowrap}
+.tracklist ol{list-style:none;max-height:570px;overflow-y:auto}
+.tracklist li button{display:grid;grid-template-columns:2.4rem 1fr;width:100%;text-align:left;padding:.45rem 1.1rem;border-bottom:1px solid rgba(39,55,59,.6);line-height:1.25;transition:background .2s}
+.tracklist li button:hover{background:var(--plate2)}
+.tracklist li button.on{background:rgba(201,160,100,.1)}
+.tracklist li button.flick{background:rgba(110,155,176,.18)}
+.tracklist li b{font-family:var(--mono);font-weight:400;font-size:.58rem;color:var(--faint);padding-top:.3rem}
+.tracklist li .tt{font-size:1.02rem}
+.tracklist li.on .tt,.tracklist li button.on .tt{color:var(--brass)}
+.tracklist li small{display:block;color:var(--muted);font-style:italic;font-size:.86rem}
+.tracklist li small i{font-style:normal;font-family:var(--mono);font-size:.54rem;color:var(--steel);margin-left:.4rem}
+.player{padding:1.4rem 1.2rem;display:flex;flex-direction:column;gap:1rem}
+.player svg{width:100%;height:auto;display:block}
+#platter{transform-origin:150px 150px}
+#platter.spin{animation:spin 1.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#tonearm{transform-origin:262px 38px;transform:rotate(-26deg);transition:transform 1s var(--ease)}
+#tonearm.down{transform:rotate(0deg)}
+.now{min-height:5.2em}
+.now .np-k{font-family:var(--mono);font-size:.6rem;color:var(--faint)}
+.now .np-t{font-size:1.5rem;line-height:1.15;margin:.2rem 0}
+.now .np-a{font-style:italic;color:var(--muted)}
+.controls{display:flex;flex-wrap:wrap;gap:.5rem}
+.controls button,.controls a{font-family:var(--mono);font-size:.64rem;border:1px solid var(--rule2);padding:.45rem .7rem;text-decoration:none;transition:border-color .2s,color .2s}
+.controls button:hover,.controls a:hover{border-color:var(--brass);color:var(--brass)}
+.controls .draw{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+.controls .draw:hover{background:var(--text);color:var(--ink)}
+
+footer{position:relative;z-index:2;max-width:1320px;margin:0 auto;padding:1.4rem 2.4rem 2rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:var(--mono);font-size:.62rem;color:var(--faint)}
+body[data-view="home"] footer{display:none}
+footer a{text-decoration:none;color:var(--muted)}
+
+@media (max-width:1100px){
+  .deck{grid-template-columns:1fr 1.4fr}
+  .deck .player{grid-column:1/-1;border-left:0!important;border-top:1px solid var(--rule);display:grid;grid-template-columns:260px 1fr;align-items:center}
+}
+@media (max-width:1100px){.emblem span{display:none}}
+@media (max-width:1000px){
+  .about-wrap,.plate,.writing-wrap{grid-template-columns:1fr;gap:2rem}
+  .writing-wrap aside{position:static}
+  .earlier-list{grid-template-columns:1fr}
+  .earlier-list a{border-right:0;border-bottom:1px solid var(--rule);margin-right:0}
+  .map-legend,.home-index{display:none}
+}
+@media (max-width:760px){
+  nav{padding:.6rem 1rem;gap:.6rem;flex-wrap:wrap}
+  .emblem span{display:none}
+  .lang-switch{margin-left:auto;order:2}
+  .nav-sections{order:3;width:100%;margin:0}
+  .nav-sections a{padding:.55rem .75rem;flex:1;text-align:center}
+  .sheet{padding:7.5rem 1.2rem 2rem}
+  .hero-content{left:1.2rem;right:1.2rem;bottom:2.5rem}
+  .sec-head{grid-template-columns:3.5rem 1fr}
+  .sec-note{grid-column:1/-1}
+  .fig-split{grid-template-columns:1fr}
+  .fig-split>div+div{border-left:0;border-top:1px solid var(--rule)}
+  .deck{grid-template-columns:1fr}
+  .deck>div+div{border-left:0;border-top:1px solid var(--rule)}
+  .deck .player{grid-template-columns:1fr}
+  .book-grid{grid-template-columns:repeat(2,1fr)}
+  .shelf-intro{grid-template-columns:1fr}
+  .timeline{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body data-view="home">
+
+<canvas id="terrain" aria-label="Topographic map of a loss surface. On the home sheet, click anywhere to trace a gradient descent path."></canvas>
+<div id="veil"></div>
+<div id="wipe"></div>
+
+<div class="mobile-menu" id="mobileMenu" translate="no" role="dialog" aria-label="Menu">
+  <button class="mobile-close" onclick="closeMobileMenu()" aria-label="Close menu">✕</button>
+  <a href="#home" onclick="closeMobileMenu()">Aeternifrigus</a>
+  <a href="#about" onclick="closeMobileMenu()">§01 about</a>
+  <a href="#projects" onclick="closeMobileMenu()">§02 repos</a>
+  <a href="#writing" onclick="closeMobileMenu()">§03 writing</a>
+  <a href="#poison" onclick="closeMobileMenu()">§04 poison</a>
+  <a href="#music" onclick="closeMobileMenu()">§05 music</a>
+</div>
+
+<nav translate="no">
+  <a class="emblem" href="#home" aria-label="Aeternifrigus, home"><svg aria-hidden='true' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><g fill='none' stroke='#C9A064' stroke-linecap='round' stroke-linejoin='round'><path d='M18 5 L13.2 55.6' stroke-width='5'/><path d='M6.9 27.2 L35.2 22.1' stroke-width='3.6'/><path d='M35.2 22.1 L13.7 54.7' stroke-width='2.2'/><path d='M6.9 27.2 L22 36.5' stroke-width='2.2'/></g><path d='M17.2 31.6 L57.6 57.2 L56.2 60.4 L16.2 35.6 Z' fill='#C9A064'/><circle cx='56.9' cy='58.8' r='2.6' fill='#C9A064'/></svg><span>Aeternifrigus</span></a>
+  <div class="nav-sections" id="navSections">
+    <a href="#home" data-k="home">§00 home</a>
+    <a href="#about" data-k="about">§01 about</a>
+    <a href="#projects" data-k="projects">§02 repos</a>
+    <a href="#writing" data-k="writing">§03 writing</a>
+    <a href="#poison" data-k="poison">§04 poison</a>
+    <a href="#music" data-k="music">§05 music</a>
+    <i id="navInk"></i>
+  </div>
+  <div class="lang-switch">
+    <button class="active" onclick="setLang('en',this)">EN</button><span class="sep">·</span>
+    <button onclick="setLang('hi',this)">हि</button><span class="sep">·</span>
+    <button onclick="setLang('od',this)">ଓଡ଼</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- HOME -->
+<section class="view" id="home" data-view="home" translate="no">
+  <div class="hero-scrim"></div>
+  <div class="home-index" id="homeIndex">
+    <a href="#about"><b>§01</b>About</a>
+    <a href="#projects"><b>§02</b>Repos</a>
+    <a href="#writing"><b>§03</b>Writing</a>
+    <a href="#poison"><b>§04</b>Poison</a>
+    <a href="#music"><b>§05</b>Music</a>
+  </div>
+  <div class="hero-content">
+    <p class="hero-tag">∀x ∈ existence · x remains undefined</p>
+    <h1 class="hero-name" id="heroName" aria-label="Aeternifrigus"><em>Aeterni</em>frigus</h1>
+    <div class="hero-sig">
+      <svg class="sig" viewBox="-24 -128 324 222" role="img" aria-label="କୌସ୍ତୁଭ">
+        <defs>
+          <linearGradient id="sigFill" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#A9844F"/><stop offset=".44" stop-color="#C9A064"/><stop offset=".5" stop-color="#EEDDB6"/><stop offset=".56" stop-color="#C9A064"/><stop offset="1" stop-color="#A9844F"/>
+            <animateTransform attributeName="gradientTransform" type="translate" values="-1 0;1 0;1 0" keyTimes="0;.5;1" dur="9s" begin="3.4s" repeatCount="indefinite"/>
+          </linearGradient>
+          <filter id="hand" x="-4%" y="-4%" width="108%" height="108%">
+            <feTurbulence type="fractalNoise" baseFrequency=".012 .03" numOctaves="2" seed="5" result="n"/>
+            <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <filter id="contour" x="-20%" y="-20%" width="140%" height="140%">
+            <feMorphology in="SourceAlpha" operator="dilate" radius="5.4" result="a1"/><feMorphology in="SourceAlpha" operator="dilate" radius="4.9" result="b1"/>
+            <feComposite in="a1" in2="b1" operator="out" result="r1"/>
+            <feMorphology in="SourceAlpha" operator="dilate" radius="11" result="a2"/><feMorphology in="SourceAlpha" operator="dilate" radius="10.6" result="b2"/>
+            <feComposite in="a2" in2="b2" operator="out" result="r2"/>
+            <feMorphology in="SourceAlpha" operator="dilate" radius="17" result="a3"/><feMorphology in="SourceAlpha" operator="dilate" radius="16.6" result="b3"/>
+            <feComposite in="a3" in2="b3" operator="out" result="r3"/>
+            <feFlood flood-color="#C9A064" flood-opacity=".38"/><feComposite in2="r1" operator="in" result="c1"/>
+            <feFlood flood-color="#8E6F43" flood-opacity=".3"/><feComposite in2="r2" operator="in" result="c2"/>
+            <feFlood flood-color="#6E9BB0" flood-opacity=".16"/><feComposite in2="r3" operator="in" result="c3"/>
+            <feMerge><feMergeNode in="c3"/><feMergeNode in="c2"/><feMergeNode in="c1"/></feMerge>
+          </filter>
+        </defs>
+        <text class="rings" x="0" y="0" filter="url(#contour)" aria-hidden="true">କୌସ୍ତୁଭ</text>
+        <g filter="url(#hand)"><text class="ink" x="0" y="0">କୌସ୍ତୁଭ</text></g>
+        <g class="sig-rule" aria-hidden="true">
+          <path class="hair" d="M-14 86 L284 86" pathLength="1"/>
+          <rect x="-17.5" y="82.5" width="7" height="7" fill="none" stroke="#C9A064"/>
+          <circle class="min" cx="288" cy="86" r="3.4" fill="#A5473C"/>
+        </g>
+      </svg>
+    </div>
+    <p class="hero-phonetic">/ eɪ·tər·niː·frɪɡ·əs / &nbsp;·&nbsp; lat. "the eternal cold" &nbsp;·&nbsp; n. a threshold one never quite crosses</p>
+    <p class="hero-desc">Occasionally, a person.</p>
+    <div class="hero-meta">
+      <a href="https://github.com/Aeternifrigus" target="_blank" rel="noopener">github ↗</a>
+      <a href="https://medium.com/@aeternifrigus" target="_blank" rel="noopener">medium ↗</a>
+      <a href="https://www.spoj.com/users/aeternifrigus/" target="_blank" rel="noopener">spoj · #58 ↗</a>
+      <a href="mailto:kmrkstv@outlook.com">kmrkstv@outlook.com</a>
+      <span>24 · somewhere cold</span>
+    </div>
+  </div>
+  <aside class="map-legend" aria-live="polite">
+    <div class="lg-title">Sheet 0 · the terrain of a loss</div>
+    <div class="fx">f(x,y) = ½λ‖x‖² − Σᵢ aᵢ·exp(−‖x−μᵢ‖²/2σᵢ²)</div>
+    <div>Contour interval 0.08. Heavy lines every fifth.</div>
+    <div>Click the map to send a descent with momentum. Use ← → to change sheets.</div>
+    <div class="key"><span><i class="k-start"></i>start</span><span><i class="k-path"></i>path</span><span><i class="k-end"></i>minimum</span></div>
+    <div class="readout" id="readout">Move across the sheet for a grid reference.</div>
+  </aside>
+</section>
+
+<!-- ABOUT -->
+<section class="view" id="about" data-view="about" translate="no">
+ <div class="sheet">
+  <div class="sec-head st"><span class="sec-num">§01</span><h2 class="sec-title">About</h2><span class="sec-note">non-constructive</span></div>
+  <div class="about-wrap">
+    <div class="st">
+      <div class="proof" id="proof" aria-live="polite"></div>
+      <div class="about-body"><p id="aboutBody">The username is accurate. Make of that what you will.</p></div>
+      <figure class="fig" id="figIrrWrap">
+        <svg id="figIrr" viewBox="0 0 480 300" role="img" aria-label="A trajectory I(t) that never repeats"></svg>
+        <div class="fig-bar"><span>Fig. 1.1 &nbsp; I(t) on a torus, winding ratio √2</span><button class="fig-btn" id="irrBtn">Trace again</button></div>
+        <p class="fig-cap">An irrational winding never closes. The path is dense, and it never returns to where it began.</p>
+      </figure>
+    </div>
+    <div class="st">
+      <figure class="art" data-art="melencolia"></figure>
+    </div>
+  </div>
+  <div class="pager" data-pager></div>
+ </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="view" id="projects" data-view="projects" translate="no">
+ <div class="sheet">
+  <div class="sec-head st"><span class="sec-num">§02</span><h2 class="sec-title">Repos</h2><span class="sec-note">read from github</span></div>
+  <div class="st">
+    <p class="coverage-intro" id="repoIntro">Reading public repositories.</p>
+    <div class="matrix-wrap"><table class="matrix" id="matrix"></table>
+      <div class="matrix-key"><span class="dot"></span>present in the repository</div>
+    </div>
+    <div id="plateHost"></div>
+  </div>
+  <div class="pager" data-pager></div>
+ </div>
+</section>
+
+<!-- WRITING -->
+<section class="view" id="writing" data-view="writing">
+ <div class="sheet">
+  <div class="sec-head st"><span class="sec-num">§03</span><h2 class="sec-title">Writing</h2><span class="sec-note">in the repo</span></div>
+  <div class="writing-wrap">
+    <div id="writingMain"><ol class="essays st" id="essays"></ol><article class="reader st" id="reader" hidden></article></div>
+    <aside class="st"><figure class="art" data-art="dore1"></figure></aside>
+  </div>
+  <div class="pager" data-pager></div>
+ </div>
+</section>
+
+<!-- POISON -->
+<section class="view" id="poison" data-view="poison" translate="no">
+ <div class="sheet">
+  <div class="sec-head st"><span class="sec-num">§04</span><h2 class="sec-title">Poison</h2><span class="sec-note">things that got in and stayed</span></div>
+  <div class="st">
+    <div class="tabs" role="tablist" id="shelfTabs"><i class="ink"></i></div>
+    <div id="shelfHost"></div>
+  </div>
+  <div class="pager" data-pager></div>
+ </div>
+</section>
+
+<!-- MUSIC -->
+<section class="view" id="music" data-view="music" translate="no">
+ <div class="sheet">
+  <div class="sec-head st"><span class="sec-num">§05</span><h2 class="sec-title">Music</h2><span class="sec-note" id="musicNote">choose a crate</span></div>
+  <div class="deck st">
+    <div><ul class="crates" id="crates"></ul></div>
+    <div class="tracklist">
+      <header><input id="trackSearch" type="search" placeholder="Search every crate" aria-label="Search tracks" /><span class="count" id="trackCount"></span></header>
+      <ol id="tracks"></ol>
+    </div>
+    <div class="player">
+      <svg viewBox="0 0 300 300" role="img" aria-label="Turntable">
+        <rect x="4" y="4" width="292" height="292" fill="#0c1315" stroke="#34484D"/>
+        <g id="platter">
+          <circle cx="150" cy="150" r="128" fill="#0a0f10" stroke="#27373B"/>
+          <g id="grooves"></g>
+          <circle cx="150" cy="150" r="44" fill="#C9A064"/>
+          <circle cx="150" cy="150" r="40" fill="none" stroke="#8E6F43" stroke-width=".8"/>
+          <path d="M150 116 L154 126 L150 124 L146 126Z" fill="#0F1719"/>
+          <text x="150" y="146" text-anchor="middle" style="font-family:Cormorant,Georgia,serif;fill:#0F1719" font-size="11" id="lblT">Aeternifrigus</text>
+          <text x="150" y="160" text-anchor="middle" style="font-family:'Azeret Mono',monospace;fill:#0F1719" font-size="6" id="lblA">side A</text>
+          <circle cx="150" cy="150" r="3" fill="#0F1719"/>
+          <path d="M60 110 A95 95 0 0 1 110 60" stroke="rgba(218,211,196,.12)" stroke-width="10" fill="none"/>
+        </g>
+        <g id="tonearm">
+          <circle cx="262" cy="38" r="14" fill="#131D20" stroke="#34484D"/>
+          <circle cx="262" cy="38" r="4" fill="#C9A064"/>
+          <path d="M262 38 L250 170 L222 214" stroke="#8B948F" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <rect x="210" y="208" width="18" height="11" transform="rotate(35 219 213)" fill="#DAD3C4"/>
+        </g>
+      </svg>
+      <div>
+        <div class="now" id="now"><div class="np-k">Nothing on the platter</div><div class="np-t">Pick a record</div><div class="np-a">or draw one at random</div></div>
+        <div class="controls">
+          <button class="draw" id="drawBtn">Draw at random</button>
+          <button id="prevBtn" aria-label="Previous track">Previous</button>
+          <button id="nextBtn" aria-label="Next track">Next</button>
+          <button id="stopBtn">Lift needle</button>
+          <a id="ytBtn" href="https://www.youtube.com/" target="_blank" rel="noopener">Find on YouTube ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pager" data-pager></div>
+ </div>
+</section>
+
+</main>
+
+<footer translate="no">
+  <span>Aeternifrigus · <span style="font-family:'Anek Odia',sans-serif;font-weight:200;color:var(--brass);font-size:.8rem">କୌସ୍ତୁଭ</span> · <a href="mailto:kmrkstv@outlook.com">kmrkstv@outlook.com</a> · © 2026</span>
+  <span>√2^√2 ∈ ℝ &nbsp;·&nbsp; Q.E.D.</span>
+</footer>
+
+<div id="gt_el" translate="no"></div>
+<div id="drawerShade"></div>
+<aside id="drawer" aria-hidden="true" aria-label="Book details"></aside>
+
+<script>
+const DATA = {"books": [{"t": "fiction · stoic / preferred  ·  a small sample, always hunting for more", "items": [["Metamorphosis", "Kafka"], ["Nausea", "Sartre"], ["The Stranger", "Camus"], ["Lolita", "Nabokov"], ["The Painted Veil", "Maugham"], ["The Little Prince", "Saint-Exupéry"], ["Solenoid", "Cărtărescu"], ["Fahrenheit 451", "Bradbury"], ["Monstrilio", "Córdova"], ["The Bell Jar", "Plath"], ["Earthlings", "Murata"], ["The Picture of Dorian Gray", "Wilde"], ["The Book of Disquiet", "Pessoa"], ["No Longer Human", "Dazai"], ["Labyrinths", "Borges"], ["The Catcher in the Rye", "Salinger"], ["The Maimed", "Ungar"], ["Gravity's Rainbow", "Pynchon"], ["The Woman in the Dunes", "Kōbō Abe"], ["The Master and Margarita", "Bulgakov"], ["Steppenwolf", "Hesse"], ["The Temptation to Exist", "Cioran"], ["The Unbearable Lightness of Being", "Kundera"], ["Anathem", "Stephenson"], ["Flowers for Algernon", "Keyes"], ["The Fountainhead", "Ayn Rand"], ["Candide", "Voltaire"], ["Divine Comedy", "Dante"], ["The Virgin Suicides", "Eugenides"], ["The Antichrist", "Nietzsche"]]}, {"t": "fiction · broader / snacking  ·  a small sample, always hunting for more", "items": [["Anna Karenina", "Tolstoy"], ["The Count of Monte Cristo", "Dumas"], ["Crime and Punishment", "Dostoevsky"], ["Spring Snow", "Mishima"], ["Botchan", "Natsume Sōseki"], ["1984", "Orwell"], ["Pride and Prejudice", "Austen"], ["Journey to the West", "Wu Cheng'en"], ["The Kite Runner", "Hosseini"], ["Wuthering Heights", "Brontë"], ["Frankenstein", "Shelley"], ["Jude the Obscure", "Hardy"], ["Hunger", "Hamsun"], ["The End of Eternity", "Asimov"], ["Little Dorrit", "Dickens"], ["Othello", "Shakespeare"], ["Oresteia", "Aeschylus"], ["The Old Man and the Sea", "Hemingway"], ["Gora", "Tagore"], ["Adrift in the Pacific", "Jules Verne"], ["One Hundred Years of Solitude", "García Márquez"], ["Oedipus Rex", "Sophocles"], ["Sadgati", "Premchand"], ["The Cloud Dream of the Nine", "Kim Man-Jung"], ["Beren and Lúthien", "Tolkien"], ["The Witcher", "Sapkowski"], ["Wailing Ghosts", "Pu Songling"], ["Baidehisha Bilasa", "Upendra Bhanja"], ["Don Quixote", "Cervantes"], ["Svenska Krönika", "Olaus Petri"]]}, {"t": "non-fiction · no self-help, no biographies  ·  a small sample, always hunting for more", "items": [["The Symposium", "Plato"], ["Parerga and Paralipomena", "Schopenhauer"], ["The Blind Watchmaker", "Dawkins"], ["Discourse on the Method", "Descartes"], ["The Prince", "Machiavelli"], ["Emile", "Rousseau"], ["The Analects", "Confucius"], ["Lectures on Moral Philosophy", "Whewell"], ["Science and Hypothesis", "Poincaré"], ["Moral Maxims and Reflections", "La Rochefoucauld"], ["The Wealth of Nations", "Adam Smith"], ["Goethe and Schiller's Xenions", "Goethe · Schiller"], ["Works of Love", "Kierkegaard"], ["Civilization and Its Discontents", "Freud"], ["The Expulsion of the Triumphant Beast", "Giordano Bruno"], ["Synchronicity", "Jung"], ["The Art of War", "Sun Tzu"], ["Syntactic Structures", "Chomsky"], ["Oxford History of the French Revolution", "Doyle"], ["The General Theory", "Keynes"], ["Observer Mechanic", "Bennett · Hoffman"], ["An Essay Concerning Human Understanding", "Locke"], ["Decline and Fall of the Roman Empire", "Gibbon"], ["De Legibus", "Cicero"], ["Leviathan", "Hobbes"], ["A Guide to Diplomatic Practice", "Sir Ernest Satow"], ["The Civilizing Process", "Norbert Elias"], ["On Natural Selection", "Darwin"], ["Tractatus Logico-Philosophicus", "Wittgenstein"]]}], "anime": ["Steins;Gate", "Mushishi", "Death Note", "Code Geass", "Monster", "No Game No Life", "Texhnolyze", "Serial Experiments Lain", "Paranoia Agent", "Ghost in the Shell", "Neon Genesis Evangelion"], "music": [{"t": "Bollywood & Hindi Film Music", "items": [["Pareshaan", "Shalmali Kholgade"], ["Mar Jayian Romantic", "Bann Chakraborty, Vishal Dadlani, Sunidhi Chauhan"], ["Sawaal", "Abhijeet Srivastava, Siddhant Bhosle"], ["Mere Hi Liye", "HASLEY ORIGINALS ft. Aditya Rikhari"], ["Ishq Bulaawa", "Sanam Puri, Shipra Goyal"], ["Gulabi", "Sachin-Jigar"], ["Ye Jo Halka Halka Suroor Hai", "Farhan Saeed"], ["Phero Na Najariya", "Amit Trivedi, Sireesha Bhagavatula"], ["Rubaaiyaan", "Amit Trivedi, Shahid Mallya"], ["Nit Khair Manga", "Rahat Fateh Ali Khan"], ["Sawaar Loon", "Monali Thakur"], ["Masakali", "Mohit Chauhan"], ["Guzarish", "Javed Ali"], ["Saibo", "Sachin-Jigar, Shreya Ghoshal, Tochi Raina"], ["Nazar Na Lag Jaaye", "Ash King, Sachin-Jigar"], ["Aaja Sanam (Blurface Remix)", "Blurface Music"], ["Chahunga Main Tujhe", "Dosti"], ["Udi Teri Aankhon Se", "Guzaarish"], ["Tum Todo Na (Male)", "A. R. Rahman"], ["Chori Chori Chupke Chupke", "Udit Narayan, Shreya Ghoshal"], ["Sapna Jahan", "Ajay-Atul, Sonu Nigam, Neeti Mohan"], ["Kar Har Maidaan Fateh", "Sukhwinder Singh, Shreya Ghoshal"], ["Jaadu", "Sachet Tandon"], ["Tujhe Bhula Diya Lofi Mix", "Mohit Chauhan, Vishal-Shekhar"], ["Phir Miloge Kabhi", "Yeh Raat Phir Na Aayegi"], ["Mera Dil Ye Pukare Aaja", "Lata Mangeshkar"], ["Pukarta Chala Hoon Main", "Mohammed Rafi"], ["Waqt Ne Kiya Kya Haseen Sitam", "Geeta Dutt"], ["Koi Chupke Se Aake", "Geeta Dutt"], ["Ae Se To Na Dekho", "Mohd. Rafi"], ["Bekarar Karke Hume Yun Na Jaiye", "Hemant Kumar"], ["Mehbooba Mehbooba", "Sholay"], ["Na Tum Hamein Jaano", "Hemant Kumar, Suman Kalyanpur"], ["Jalte Hein Jiske Liye", "Talat Mahmood"], ["Chupke Chupke Raat Din", "Ghulam Ali"], ["Mere Mehboob Qayamat Hogi", "Kishore Kumar"], ["Aaiye Meherbaan", "Asha Bhosle"], ["O Mere Dil Ke Chain", "Kishore Kumar"], ["Jaane Kahan Mera Jigar Gaya Ji", "Mohd. Rafi"], ["Badan Pe Sitare Lapete Huye", "Mohammed Rafi"], ["Rafta Rafta Wo Meri", "Muhammad Ali (Tribute to Mehdi Hasan)"], ["Mujh Se Pehli Si Mohabbat", "Faiz Ahmad Faiz recitation"], ["Na To Karvan Ki Talash Hai", "Manna Dey, Asha Bhosle"], ["Meri Veena Tum Bin Roye", "Lata Mangeshkar"]]}, {"t": "Indie & Fusion (Hindi / Urdu)", "items": [["Sajna Ve", "Vishal Mishra, Lisa Mishra"], ["Sundari", "Sanju Rathod, G-SPXRK"], ["Ishq", "DervishBeats"], ["Ishq Hai Jahaan", "DervishBeats"], ["Raat Ke Shikari", "Masoom Sharma"], ["Haseen (Remix)", "NDS, Rippy Grewal, Talwiinder, Simar"], ["Ranjha", "Noor Chahal"], ["Finding Her", "Kushagra, Bharath, Saaheal"], ["Fizayen", "arooh"], ["Paaro", "Aditya Rikhari"], ["Jee Nhi Lagda", "IAMPRANN"], ["Winter Ayun Waliye", "Arjuna Harjai, Jyotica Tangri"], ["Das Meriya Dilwarave", "Mohammad Rafi, Asha Bhosle"], ["8 ASLE", "Sukha, Prodgk, Chani Nattan"], ["Softly", "Karan Aujla, Ikky"], ["Violence", "Varinder Brar"], ["Ek Tarfa", "Darshan Raval"], ["Waaliyan", "Harnoor, Gifty, The Kidd"], ["FAASLE", "Aditya Rikhari"], ["SAMJHO NA (NASAMAJH)", "Aditya Rikhari"], ["Aalas Ka Pedh / Choo Lo", "The Local Train"], ["Farq Hai", "Suzonn"], ["Bikhra", "Rovalio & Abdul Hannan"], ["Chaar Diwaari", "Jhaag"], ["Nikamma", "LIFAFA"], ["Mushq-e-Gul", "Parvaaz"], ["Dobara", "Shashwat Sachdev ft. Shreya Jain"], ["Khwaab", "Anumita Nadesan"], ["Muskurahat", "MITRAZ"], ["Akhiyaan", "MITRAZ"], ["Nadiyon Sa", "MITRAZ"], ["Katputli Ke Dhaage", "Himonshu Parikh"], ["Dil Mere", "The Local Train"], ["Dil Beparvah", "Ankur Tewari"], ["Wagairah Wagairah", "Ankur Tewari ft. The Ghalat Family"], ["Wajah", "Piyush Bhisekar"], ["Tu Hai Wajah", "Piyush Bhisekar"], ["Ghaib", "Parvaaz"], ["Shaayad", "Taba Chake"], ["Raat Raazi", "Prateek Kuhad"], ["Teri Yaad", "Ankur Tewari"], ["Aaftaab", "The Local Train"], ["Bandey", "The Local Train"], ["Aakhri Salaam", "The Local Train"], ["Khudi", "The Local Train"], ["Aaoge Tum Kabhi", "The Local Train"], ["Mere Yaar", "The Local Train"], ["Yeh Zindagi Hai (Demo)", "The Local Train"], ["Mizaaj", "The Local Train"], ["Baarishein", "Anuv Jain"], ["Aajao", "Ankur Tewari ft. Grain"], ["Waqt Ki Baatein", "Dream Note"], ["Kahaani 2.0", "Dream Note"], ["Kahaani", "When Chai Met Toast"], ["tere bina", "Zaeden"], ["Sitaare", "Nikhil D'souza"], ["People (Hindi Reprise)", "Nikhil D'souza"], ["Mishri", "Anuv Jain"], ["Riha", "Anuv Jain"], ["Gul", "Anuv Jain"], ["Alag Aasmaan", "Anuv Jain"], ["Pardo", "Nishu"], ["Zakir", "Naalayak"], ["Yahan", "Vasu Raina"], ["Hata Diye", "Dream Note"], ["Dhalti Rahe", "Twin Strings"], ["Zaroori Nahi", "Dream Note"], ["Aankhon Se Batana", "Dikshant"], ["Gul Gulshan", "Parvaaz"], ["Meri Baaton Mein Tu", "Anuv Jain"], ["Kahaani", "Dream Note"], ["Bye", "Aditya Bhardwaj"], ["Khayaal", "MITRAZ"], ["Roz Roz", "Parvaaz"], ["Tu hai kahan", "AUR"], ["Baaton Baaton Main", "Shashwat Sachdev"], ["Hone Do Jo Hota Hai", "OAFF"], ["Teri Yeh Baatein", "OAFF"], ["Maand", "Bayaan, Hasan Raheem, Rovalio"], ["Sadqay X Pasoori", "Laeequsic"], ["Rang Lageya", "Mohit Chauhan, Rochak Kohli"], ["Kahan Ho Tum Chale Aao", "Humsafar"], ["Kissa Hum Likhenge (Remix)", "FarooqGotAudio"], ["Aram Ata Hai Deedar Se Tere", "Azaan Sami Khan"], ["Tere Jeya Hor Disda", "Madhur Sharma (Nusrat tribute)"], ["Uska Hi Banana (Acoustic)", "Adnan Ahmad"], ["Naina Da Kya Kasoor", "Amit Trivedi"], ["Tu Mera Nahi", "Mera Naam Yousuf Hai OST"], ["Wo Bhi Apne Na Hue", "Slowed and Reverb"], ["Khoya Khoya Chand", "The Bartender preview"], ["Tune O Rangile (Remix)", "FarooqGotAudio"], ["Big Men", "R Nait"]]}, {"t": "South Indian Cinema (Tamil, Telugu, Malayalam)", "items": [["Ishq Jalakar", "Shashwat Sachdev, Shahzad Ali"], ["Kaderum Komba", "Jakes Bejoy"], ["Parayathe Vannen", "Deepak Dev, M. G. Sreekumar, Vineeth Sreenivasan"], ["Pookkal Pookkum", "G.V. Prakash Kumar, Roop Kumar Rathod"], ["Thaa Thinnam", "Kailas Menon, Job Kurien"], ["Kannod Kanbethallam (VTKZ Remix)", "Vtkz"], ["Blood Marco Remix", "gopuishere, Ravi Basrur"], ["Neon Ride", "BABY JEAN, Zeba Tommy"], ["Empuraane", "Deepak Dev, Anand Sreeraj"], ["Roar Of Kesari", "Thaman S"], ["VIP Title Song", "Anirudh Ravichander, Dhanush"], ["Kotha Raja", "Jakes Bejoy, Asal Kolaar"], ["Un Mela Aasadhaan", "G.V. Prakash Kumar, Dhanush"], ["Manavaalan Thug", "Dabzee, SA"], ["Pala Pala", "Hariharan"], ["Aakasam Badhalaina", "Sagar, Megha"], ["Akasam Ammayaithe", "Shankar Mahadevan, Gopika Poornima"], ["Ethir Neechal", "Anirudh, Yo Yo Honey Singh, Hiphop Tamizha"], ["Thuli Thuli", "Yuvan Shankar Raja, Haricharan"], ["En Kadhal Solla", "Yuvan Shankar Raja, Tanvi Shah"], ["Idhazhin Oram", "Anirudh Ravichander, Ajesh"], ["Premalo", "Vijai Bulganin, Anurag Kulakarni"], ["Oru Dinam", "Anand Bhaskar"], ["Muthuchippi", "Shaan Rahman, Sachin Warrier"], ["Iru Nenjil", "Maharani, ItsYaBoiKay"], ["Neela Nilave (Female)", "Sam C.S., Shweta Mohan"], ["Oh Raaya", "A.R. Rahman, Ganavya, Dhanush"], ["Gudugudiya Sedi Nodo", "Raghu Dixit"], ["Be Free", "Vidya Vox"], ["Jujubee", "Anirudh Ravichander, Dhee"], ["Veeraa Sooraa", "Yuvan Shankar Raja, Rahul Nambiar"], ["Gun-in Kadhal", "Vijay Yesudas"], ["Hunter Vantaar", "Anirudh Ravichander, Siddharth Basrur"], ["Kannala Kannala", "Hiphop Tamizha, Kaushik Krish"], ["Yali Yali (Radio Edit)", "Skillz Jay"], ["Manasse Manasse", "Hesham Abdul Wahab, Vineeth Sreenivasan"], ["Katchi Sera", "Sai Abhyankkar"], ["Unakku Thaan", "Dhibu Ninan Thomas, Santhosh Narayanan"], ["Bisilu Kudureyondu", "Rajesh Krishnan, Yogaraj Bhat"], ["Hey Tara", "Aishwrya Ravichandran"], ["Iru Nenjil", "Maharani, ItsYaBoiKay ft. Aparna Raguraman"]]}, {"t": "K-Pop", "items": [["Lucifer", "ENHYPEN"], ["Farewell, Neverland", "TOMORROW X TOGETHER"], ["Go Big or Go Home", "ENHYPEN"], ["MOUNTAINS", "Stray Kids"], ["Moonstruck", "ENHYPEN"], ["Still Monster", "ENHYPEN"], ["Still With You", "Jung Kook"], ["HIP", "MAMAMOO"], ["I Am The Best", "2NE1"], ["Charmer", "Stray Kids"], ["Peek-A-Boo", "Red Velvet"], ["gogobebe", "MAMAMOO"], ["SHEESH", "BABYMONSTER"], ["Drunk-Dazed", "ENHYPEN"], ["FLOWER", "JISOO"], ["Ring Ding Dong", "SHINee"], ["손오공", "SEVENTEEN"], ["Pretty Savage", "BLACKPINK"], ["God's Menu", "Stray Kids"], ["Next Level", "aespa"], ["The Eve", "EXO"], ["MANIAC", "Stray Kids"], ["ON", "BTS"], ["Bonamana", "SUPER JUNIOR"], ["AYA", "MAMAMOO"], ["TRAP", "HENRY"], ["Drunk-Dazed", "ENHYPEN"]]}, {"t": "International Rock & Alternative", "items": [["Wolf Totem", "The HU"], ["Human", "Rag'n'Bone Man"], ["Take You Dancing", "Jason Derulo"], ["Shameless", "Camila Cabello"], ["Sapphire", "Ed Sheeran"], ["I Wanna Be Your Slave", "Måneskin"], ["Obsessed", "Ayumu Imazu"], ["Golden Hour (Fujii Kaze Remix)", "JVKE"], ["Six Days", "DJ Shadow"], ["For Whom The Bell Tolls", "Metallica"], ["The Arsonist", "Alec Benjamin"], ["MONTERO: Call Me By Your Name", "Lil Nas X"], ["Deadwood", "Really Slow Motion"], ["Unravel (Full Version)", "Jonathan Young"], ["A Horse with No Name", "America"], ["Stuck In The Middle With You", "Stealers Wheel"], ["(I Just) Died In Your Arms", "Cutting Crew"], ["Layla (Unplugged)", "Eric Clapton"], ["I Love You Baby", "Frank Sinatra"], ["Hotel California", "Eagles"], ["Shape Of My Heart", "Sting"], ["Send Me An Angel", "Scorpions"], ["Yellow Ledbetter", "Pearl Jam"], ["War Pigs", "Black Sabbath"], ["The Man Who Sold The World (Unplugged)", "Nirvana"], ["In Cold Blood", "alt-J"], ["Come As You Are", "Nirvana"], ["Writing on the Wall", "Anekdoten"], ["Automatic for the People (Full Album)", "R.E.M."], ["Angel Of Small Death & The Codeine Scene", "Hozier"], ["Killing Me Softly", "Frank Sinatra"], ["Sweet Child O' Mine", "Guns N' Roses"], ["Welcome To The Jungle", "Guns N' Roses"], ["I Was Made For Lovin' You", "Kiss"], ["Fiesta Pagana", "Mägo de Oz"], ["Molinos De Viento", "Mägo de Oz"], ["Still Loving You", "Scorpions"], ["Carry on Wayward Son", "Kansas"], ["Dust in the Wind", "Kansas"], ["Sedated", "Hozier"], ["Sinners", "Barns Courtney"], ["Blood on My Name", "The Brothers Bright"], ["You Can Run", "Adam Jones"], ["Far From Home (The Raven)", "Sam Tinnesz"], ["Can't Go To Hell", "Sin Shake Sin"], ["Time of Dying", "Three Days Grace"], ["Animal I Have Become", "Three Days Grace"], ["Devil's Price", "PoorMansPoison"], ["Old Number Seven", "The Devil Makes Three"], ["Opiates and Opossums", "Dustin Ford"], ["God and a Gun", "Query Productions"], ["Dead Inside", "Younger Hunger"], ["I'm Not A Saint", "Billy Raffoul"], ["Purge", "Sonictron"], ["If I Were the Devil", "Colby Acuff"], ["Black And Red", "Reignwolf"], ["Jolene", "Dolly Parton"], ["Cherry Wine (Unplugged)", "Hozier"], ["Appalachian Woman", "Caledonia"], ["Ease My Troubled Mind", "Austin Stanley"], ["Hurricane", "The Band Of Heathens"], ["Everyone's An Outlaw", "Bryan Martin"], ["Ain't No Rest For The Wicked", "Cage The Elephant"], ["25 to Life", "Josh Meloy"], ["Already Dead", "Josh Meloy"], ["All Choked Up Again", "Ryan Bingham"], ["Breezeblocks", "alt-J"], ["Talk Is Cheap", "Chet Faker"], ["Do I Wanna Know?", "Arctic Monkeys"], ["Can't Feel My Face", "The Weeknd"], ["Bones", "Imagine Dragons"], ["All Out Of Love", "Air Supply"], ["A Man Without Love", "Engelbert Humperdinck"], ["Careless Whisper", "George Michael"], ["San Quentin", "Nickelback"], ["Dark Necessities", "Red Hot Chili Peppers"], ["Smells Like Teen Spirit", "Nirvana"], ["Nara", "alt-J"], ["Arsonist's Lullabye", "Hozier"], ["Broken Bones", "KALEO"], ["Broken", "Lund"], ["Now I'm Blind", "Loner Deer"], ["I Know How To Speak (Acoustic)", "Manchester Orchestra"], ["Follow The Sun", "Xavier Rudd"], ["Society", "Eddie Vedder"], ["The Ballad Of Cleopatra", "The Lumineers"], ["You're Somebody Else", "flora cash"], ["Courtesy Call", "Thousand Foot Krutch"], ["Hail to the King", "Avenged Sevenfold"], ["Zombie", "Bad Wolves"], ["Like a Stone", "Audioslave"], ["Numb", "Linkin Park"], ["Paradise City", "Guns N' Roses"], ["The Silence", "Manchester Orchestra"], ["Losing My Religion", "R.E.M."], ["It's My Life", "Bon Jovi"], ["I Will Not Bow", "Breaking Benjamin"], ["Tears Don't Fall", "Bullet For My Valentine"], ["The Foundations of Decay", "My Chemical Romance"], ["World's Smallest Violin", "AJR"], ["In Hell I'll Be In Good Company", "The Dead South"], ["Stressed Out", "twenty one pilots"], ["Soldier, Poet, King", "The Oh Hellos"], ["Thus Always To Tyrants", "The Oh Hellos"], ["Why'd You Only Call Me When You're High?", "Arctic Monkeys"], ["Dear Wormwood", "The Oh Hellos"], ["Pelicans We", "Cosmo Sheldrake"], ["Snake Charmer", "Saint Motel"], ["My Demons", "Starset"], ["Kukushka", "Kino"], ["Blood // Water", "grandson"], ["Panic Room", "Au/Ra"], ["Born For This", "The Score"], ["Königin", "Völkerball"], ["Пачка сигарет", "Kino"], ["Bat Country", "Avenged Sevenfold"], ["Ich Tu Dir Weh", "Rammstein"], ["Deadcrush", "alt-J"], ["Plasma", "STAHLMANN"], ["Fear of the Dark", "Iron Maiden"], ["The Writing On The Wall", "Iron Maiden"], ["Feel Good Inc.", "Gorillaz"], ["Knee Socks", "Arctic Monkeys"], ["Ophelia", "The Lumineers"], ["Between Angels And Insects", "Papa Roach"], ["Fade To Black", "Metallica"], ["Where's My Love (Acoustic)", "SYML"], ["The Night We Met", "Lord Huron"], ["Moonlight", "Kali Uchis"], ["My Alcoholic Friends", "The Dresden Dolls"], ["Drinking Blood", "Jonathan Young"], ["Gurenge (English cover)", "Jonathan Young"], ["UNRAVEL (English cover)", "Jonathan Young"], ["HELLFIRE (Metal Cover)", "Jonathan Young"], ["Love Me Again", "John Newman"], ["Maybe My Soulmate Died", "iamnotshane"], ["Alien Blues", "Vundabar"], ["Delusions of Saviour", "Slayer"], ["Beggin", "TroyBoi, BombayMami"], ["Karma Police (Cover)", "The Love Finders Band"], ["Softly", "Karan Aujla, Ikky"], ["Violence", "Varinder Brar"], ["Mike", "Elvana Gjata, Ledri Vula"], ["My tea's gone cold", "unhappier."], ["Perfect (Polish/English)", "whisper1567"], ["Beggin", "TroyBoi, BombayMami"]]}, {"t": "J-Pop & C-Pop", "items": [["魑魅魍魉", "周林枫"], ["勢 (SEEK)", "半噸兄弟"], ["Tinh Nguyệt Nguyên Dã (星月原野)", "一颗狼星"], ["愛麗絲", "Kenshi Yonezu"], ["LOSER", "Kenshi Yonezu"], ["剑魂", "汪苏泷"], ["清空", "王忻辰"], ["风夜行", "蒋雪儿Snow.J"], ["三拜红尘凉", "二晗"], ["借梦", "周深"], ["渡不了轮回", "尹昔眠"], ["Kiri Ga Naikara", "Fujii Kaze"], ["When The Spine Becomes Opal (Live)", "Kenshi Yonezu"], ["Shinigami", "Kenshi Yonezu"], ["Shinunoga E-Wa", "Fujii Kaze"], ["千秋迭梦", "阿YueYue, 镜予歌"], ["The Nameless Song (何以歌)", "ѕιиτнєα"], ["刀馬旦 (Live)", "CoCo李玟 ft. G.E.M."], ["若月亮没来", "王宇宙Leto, 乔浚丞"], ["燕无歇", "蒋雪儿Snow.J"], ["doubt", "R+..."], ["Love-song", "natori"], ["敦煌谣", "蒋雪儿Snow.J"], ["芒种", "音阙诗听, 赵方婧"], ["Gu Cheng", "Chen Zhuoxuan, Sun Bunlun"], ["Don't Let Me Be Misunderstood", "Fujii Kaze"], ["golden hour (Remix)", "JVKE, Fujii Kaze"], ["Stay & Say", "Lê Khoa"], ["Anh, Hôm Nay Thế Nào!", "Châu Dương"], ["NGỠ TÌNH BAY XA", "Hồng Yến"], ["Mắt biếc", "Đỗ Đông Nam"], ["月に願いを", "ayaaya4426"], ["Love Song (Ikkun Cover)", "Da-iCE / Ikkun"], ["Maiya Dar Nach Di Phiran", "Monika Slathia"]]}, {"t": "Devotional & Spiritual", "items": [["Vedsar Shiv Stav", "Abhilipsa Panda"], ["Shiv Swarnamala Stuti", "Religious India"], ["Shri Bhairav Tandav", "Shri Dhananjay Tiwari"], ["Dashavatar", "Narci, Bhuvan Sharma, Ezik"], ["Shoorveer", "Rapperiya Baalam, Rajneesh Jaipuri"], ["NIDHIVAN", "Hrutul Patel"], ["Pyaro Vrindavan", "Indresh Upadhyay"], ["Hamari Atariya", "Inayat Kaur Bajaj"], ["Kamalakucha (Sri Venkateswara Stotram)", "Vinaya Karthik Rajan"], ["Kautilya", "Rishab Rikhiram Sharma, Naveen Kumar"], ["Chanakya", "Rishab Rikhiram Sharma"], ["Raj Karega Khalsa", "Daler Mehndi, Navraj Hans"], ["Krishna Ki Chetavani", "Agam Aggarwal, Siddharth Sharma"], ["Sukh Ke Sab Saathi", "Mohammed Rafi"], ["Chandrahaas", "Narci"], ["विष्णु मंत्र · शान्ताकारं", "Spiritual Bhakti"], ["MADHURASHTAKAM", "Love_Voice"], ["Jis Haal Mein Rakhe Sai", "Maninder Mahi"], ["Haro Re Bhola", "Tejaswini Sharma"], ["KALAMKAARI CHAMATKAARI", "Hrutul"], ["Makhanchor ni Murli", "Hrutul"], ["CHAKRA KA CHAKRAVYUH", "Hrutul"], ["MOH MAAYA", "Hrutul"], ["KARM SE KARN", "Hrutul"], ["Chakradhari", "Vinay Katoch, Siddharth"], ["Epic Vishnu Darshan", "Agam Aggarwal, Siddharth"], ["Im Hashem Lo Yivneh Bayis", "Shira Choir"]]}]};
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const C = {ink:'#0F1719',plate:'#131D20',rule:'#27373B',rule2:'#34484D',text:'#DAD3C4',muted:'#8B948F',faint:'#5A6663',brass:'#C9A064',brassD:'#8E6F43',steel:'#6E9BB0',ox:'#A5473C'};
+/* ---------- utilities ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function t(x,y,s,o={}){const a=o.anchor||'start',cl=o.cls||'svgt',fs=o.size?`font-size="${o.size}"`:'',fill=o.fill?`style="fill:${o.fill}"`:'',it=o.italic?'font-style="italic"':'';return `<text x="${x}" y="${y}" text-anchor="${a}" class="${cl}" ${fs} ${fill} ${it}>${esc(s)}</text>`}
+function box(x,y,w,h,label,o={}){const st=o.stroke||C.rule2,fill=o.fill||C.ink;let s=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${fill}" stroke="${st}" stroke-width="1"/>`;s+=t(x+w/2,y+h/2+(o.sub?-2:5),label,{anchor:'middle',cls:'svgs',size:o.size||15,fill:o.color});if(o.sub)s+=t(x+w/2,y+h/2+13,o.sub,{anchor:'middle',size:o.subSize||8});return s}
+function arrow(x1,y1,x2,y2,o={}){const col=o.color||C.muted,a=Math.atan2(y2-y1,x2-x1),L=6;const p=`${x2},${y2} ${x2-L*Math.cos(a-.4)},${y2-L*Math.sin(a-.4)} ${x2-L*Math.cos(a+.4)},${y2-L*Math.sin(a+.4)}`;return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="1" ${o.dash?'stroke-dasharray="3 3"':''}/><polygon points="${p}" fill="${col}"/>`}
+function grid(x0,y0,w,h,nx,ny){let s='';for(let i=0;i<=nx;i++){const x=x0+w*i/nx;s+=`<line x1="${x}" y1="${y0}" x2="${x}" y2="${y0+h}" stroke="${C.rule}" stroke-width=".6"/>`}for(let j=0;j<=ny;j++){const y=y0+h*j/ny;s+=`<line x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}" stroke="${C.rule}" stroke-width=".6"/>`}return s}
+
+
+/* ---------- BOOK METADATA ---------- */
+// title: [year label, sortable year, field, description, motif or art key]
+const BOOKMETA={
+"Metamorphosis":["1915",1915,"Novella · absurdist fiction","A travelling salesman wakes as a giant insect, and learns how conditional his family's love was.","beetle"],
+"Nausea":["1938",1938,"Novel · existentialism","A historian in a seaside town is overwhelmed by the bare, meaningless fact that things exist.","root"],
+"The Stranger":["1942",1942,"Novel · absurdism","Meursault kills a man on a sunlit beach and is condemned less for the crime than for his indifference.","sun"],
+"Lolita":["1955",1955,"Novel · unreliable narration","A monstrous narrator uses beautiful prose to disguise the abuse of a child. A study in how style can lie.","butterfly"],
+"The Painted Veil":["1925",1925,"Novel · psychological fiction","An unfaithful wife follows her husband into a cholera epidemic and finds a harder kind of self-knowledge.","veil"],
+"The Little Prince":["1943",1943,"Novella · philosophical fable","A pilot stranded in the desert meets a boy from an asteroid who asks the questions adults stopped asking.","rose"],
+"Solenoid":["2015",2015,"Novel · metaphysical fiction","A failed writer teaching in Bucharest keeps a diary of dreams, anomalies and exits from three dimensions.","coil"],
+"Fahrenheit 451":["1953",1953,"Novel · dystopian fiction","A fireman whose job is burning books begins, dangerously, to read them.","flame"],
+"Monstrilio":["2023",2023,"Novel · literary horror","A grieving mother raises a creature grown from her dead son's lung, and a family learns to love a monster.","lung"],
+"The Bell Jar":["1963",1963,"Novel · autobiographical fiction","A gifted young woman in 1950s New York feels the air around her close like glass.","belljar"],
+"Earthlings":["2018",2018,"Novel · satire","A woman convinced she is an alien refuses the machinery that manufactures ordinary adult lives.","planet"],
+"The Picture of Dorian Gray":["1890",1890,"Novel · Gothic, aestheticism","A beautiful young man stays unmarked while his portrait quietly records every sin.","frame"],
+"The Book of Disquiet":["1982",1982,"Fragmentary prose · philosophy","A bookkeeper's assistant in Lisbon writes a lifetime of reflections on dreaming instead of living.","pages"],
+"No Longer Human":["1948",1948,"Novel · confessional fiction","A man who cannot understand people plays the clown until he disqualifies himself from being human.","mask"],
+"Labyrinths":["1962",1962,"Short stories and essays","Selected Borges: infinite libraries, forking paths, and a memory that cannot forget.","labyrinth"],
+"The Catcher in the Rye":["1951",1951,"Novel · coming of age","An expelled teenager wanders New York for three days, allergic to everything phony.","cap"],
+"The Maimed":["1923",1923,"Novel · expressionism","A Prague bank clerk obsessed with order is slowly consumed by humiliation and disgust.","column"],
+"Gravity's Rainbow":["1973",1973,"Novel · postmodern fiction","Rockets fall on London, and one American officer's desires seem to predict where they land.","parabola"],
+"The Woman in the Dunes":["1962",1962,"Novel · existential allegory","An entomologist is trapped in a sand pit with a woman who must dig every night to survive.","dunes"],
+"The Master and Margarita":["1967",1967,"Novel · satire, magical realism","The Devil tours Stalin's Moscow while a persecuted writer and his lover wait for grace.","moon"],
+"Steppenwolf":["1927",1927,"Novel · philosophical fiction","A lonely intellectual, half bourgeois and half wolf, enters a Magic Theatre that dissolves the self.","art:wanderer"],
+"The Temptation to Exist":["1956",1956,"Essays · philosophy","Cioran's lucid, bitter essays on history, belief and the trap of simply carrying on.","abyss"],
+"The Unbearable Lightness of Being":["1984",1984,"Novel · philosophical fiction","Lovers in Prague around 1968 weigh a life of lightness against a life of weight.","scales"],
+"Anathem":["2008",2008,"Novel · speculative fiction","Mathematician-monks sealed away from the world are called out when something appears in orbit.","clock"],
+"Flowers for Algernon":["1966",1966,"Novel · science fiction","An experiment raises a man's intelligence, and his journal records the rise and the fall.","maze"],
+"The Fountainhead":["1943",1943,"Novel · philosophical fiction","An uncompromising architect refuses to design by committee, whatever it costs him.","tower"],
+"Candide":["1759",1759,"Novella · satire","A youth taught that all is for the best meets every catastrophe the world can arrange.","sprout"],
+"Divine Comedy":["c. 1321",1321,"Epic poem","Dante is led through Hell, Purgatory and Paradise: a complete cartography of sin and salvation.","art:dore8"],
+"The Virgin Suicides":["1993",1993,"Novel · literary fiction","Neighbourhood boys, now grown, still try to explain five sisters they never understood.","candles"],
+"The Antichrist":["1895",1895,"Philosophy · polemic","Nietzsche's attack on Christianity as a revaluation of values that exalts weakness.","bolt"],
+
+"Anna Karenina":["1878",1878,"Novel · realism","A woman leaves her marriage for love, and Russian society closes ranks around her.","rails"],
+"The Count of Monte Cristo":["1844",1844,"Novel · adventure","Wrongly imprisoned for fourteen years, a sailor escapes, finds a fortune and engineers revenge.","island"],
+"Crime and Punishment":["1866",1866,"Novel · psychological fiction","A poor student murders a pawnbroker to prove a theory and is undone by his conscience.","axe"],
+"Spring Snow":["1969",1969,"Novel · The Sea of Fertility, I","An aristocratic youth in Taishō Tokyo wants a woman only once she becomes impossible.","blossom"],
+"Botchan":["1906",1906,"Novel · comic fiction","A rash, honest young teacher from Tokyo takes a post at a provincial school full of hypocrites.","brush"],
+"1984":["1949",1949,"Novel · dystopian fiction","Winston Smith rewrites history for the Party and makes the mistake of wanting the truth.","eye"],
+"Pride and Prejudice":["1813",1813,"Novel · comedy of manners","Elizabeth Bennet and Mr Darcy misjudge each other until pride and prejudice give way.","rings"],
+"Journey to the West":["1592",1592,"Classical novel · mythology","A monk travels to India for the scriptures, guarded by the unruly Monkey King.","cloudswirl"],
+"The Kite Runner":["2003",2003,"Novel · literary fiction","A man returns to Afghanistan to atone for betraying the friend of his childhood.","kite"],
+"Wuthering Heights":["1847",1847,"Novel · Gothic","On the Yorkshire moors, Heathcliff and Catherine's love curdles into vengeance across generations.","tree"],
+"Frankenstein":["1818",1818,"Novel · Gothic science fiction","A scientist creates life and abandons it, and his creature comes to demand a reckoning.","bolt"],
+"Jude the Obscure":["1895",1895,"Novel · tragedy","A stonemason dreams of the university and is broken by class, marriage and convention.","arch"],
+"Hunger":["1890",1890,"Novel · psychological fiction","A starving writer drifts through Kristiania, proud, hallucinating, unable to ask for help.","plate"],
+"The End of Eternity":["1955",1955,"Novel · science fiction","An organisation outside time edits history for the greater good, until one technician falls in love.","hourglass"],
+"Little Dorrit":["1857",1857,"Novel · social satire","Born in a debtors' prison, Amy Dorrit outlasts the bureaucracy and greed of Victorian London.","bars"],
+"Othello":["c. 1603",1603,"Tragedy · drama","Iago poisons a general's trust in his wife with a handkerchief and a few well-placed words.","cloth"],
+"Oresteia":["458 BCE",-458,"Tragic trilogy","A cycle of murder in the house of Atreus ends in the first trial by jury.","mask"],
+"The Old Man and the Sea":["1952",1952,"Novella","An old Cuban fisherman hooks a giant marlin and fights the sharks to bring it home.","fish"],
+"Gora":["1910",1910,"Novel · political fiction","A fiercely orthodox young nationalist in Calcutta discovers the truth of his own birth.","lotus"],
+"Adrift in the Pacific":["1888",1888,"Novel · adventure","Schoolboys on a drifting schooner are wrecked on an island and must learn to govern themselves.","ship"],
+"One Hundred Years of Solitude":["1967",1967,"Novel · magical realism","Seven generations of the Buendía family repeat their names, passions and solitude in Macondo.","butterfly"],
+"Oedipus Rex":["c. 429 BCE",-429,"Tragedy · drama","A king investigating a plague discovers that he is its cause.","eyeX"],
+"Sadgati":["1931",1931,"Short story · social realism","A labourer is worked to death for a priest; Premchand's short, unsparing indictment of caste.","hut"],
+"The Cloud Dream of the Nine":["1687",1687,"Classical novel","A Buddhist novice dreams an entire worldly life of glory and love, then wakes.","clouds"],
+"Beren and Lúthien":["2017",2017,"Mythopoeic fiction","A mortal man and an immortal elf-maiden set out to steal a jewel from the crown of a dark lord.","gem"],
+"The Witcher":["1993",1993,"Fantasy · short stories","Geralt, a mutant hunter of monsters, keeps finding that people are the worse beasts.","sword"],
+"Wailing Ghosts":["c. 1700",1700,"Supernatural tales","Pu Songling's strange tales of fox spirits, ghosts and luckless scholars.","lantern"],
+"Baidehisha Bilasa":["18th c.",1750,"Epic poem · Odia kavya","Upendra Bhanja's ornate retelling of the Ramayana, a feat of constrained verse.","bow"],
+"Don Quixote":["1605",1605,"Novel","An ageing gentleman reads too many chivalric romances and rides out to become a knight.","windmill"],
+"Svenska Krönika":["c. 1540",1540,"Chronicle · history","Olaus Petri's critical history of Sweden, sceptical of legend and royal myth.","scroll"],
+
+"The Symposium":["c. 385 BCE",-385,"Philosophy · dialogue","At a drinking party, Socrates and his friends give competing speeches on the nature of love.","cup"],
+"Parerga and Paralipomena":["1851",1851,"Philosophy · essays","Schopenhauer's most readable essays and aphorisms on suffering, wisdom and the will.","quill"],
+"The Blind Watchmaker":["1986",1986,"Science · evolutionary biology","Natural selection produces the appearance of design without any designer.","watch"],
+"Discourse on the Method":["1637",1637,"Philosophy · epistemology","Descartes doubts all he can and rebuilds knowledge from the one thing he cannot doubt.","axes"],
+"The Prince":["1532",1532,"Political philosophy","Machiavelli's handbook on taking and holding power, written without moral illusion.","crown"],
+"Emile":["1762",1762,"Philosophy of education","Rousseau imagines raising a child according to nature rather than society.","sprout"],
+"The Analects":["c. 475 BCE",-475,"Philosophy · Confucianism","Sayings of Confucius on virtue, ritual and the conduct of a gentleman.","bamboo"],
+"Lectures on Moral Philosophy":["1852",1852,"Moral philosophy","Whewell surveys the history of moral philosophy in England.","scales"],
+"Science and Hypothesis":["1902",1902,"Philosophy of science","Poincaré argues that many laws of science are conventions, chosen because they are convenient.","art:melencolia"],
+"Moral Maxims and Reflections":["1665",1665,"Aphorisms","La Rochefoucauld reduces virtue to self-interest in a few hundred merciless sentences.","quill"],
+"The Wealth of Nations":["1776",1776,"Economics","Adam Smith on the division of labour, markets, and why nations grow rich.","coin"],
+"Goethe and Schiller's Xenions":["1796",1796,"Satirical epigrams","Two poets trade barbed couplets aimed at the critics and fashions of their day.","quills2"],
+"Works of Love":["1847",1847,"Philosophy · Christian ethics","Kierkegaard separates preferential love from love of the neighbour as a duty.","rings"],
+"Civilization and Its Discontents":["1930",1930,"Psychoanalysis","Civilization demands the repression of instinct, and we pay for it in guilt.","iceberg"],
+"The Expulsion of the Triumphant Beast":["1584",1584,"Philosophy · allegory","Bruno's gods purge the constellations of vice: a satire on morality and religion.","stars"],
+"Synchronicity":["1952",1952,"Analytical psychology","Jung on meaningful coincidences that no causal chain explains.","waves"],
+"The Art of War":["c. 5th c. BCE",-500,"Military strategy","Sun Tzu's principles for winning, ideally without fighting at all.","spears"],
+"Syntactic Structures":["1957",1957,"Linguistics","Chomsky proposes generative grammar: finite rules that produce every sentence of a language.","syntax"],
+"Oxford History of the French Revolution":["1989",1989,"History","How an absolute monarchy collapsed into revolution, war and terror.","bastille"],
+"The General Theory":["1936",1936,"Economics","Keynes argues that demand drives employment and that markets can stay depressed for years.","curve"],
+"Observer Mechanic":["1989",1989,"Cognitive science · mathematics","A formal theory of perception as inference performed by observers.","eyecube"],
+"An Essay Concerning Human Understanding":["1689",1689,"Philosophy · empiricism","Locke argues that the mind begins blank and is written on by experience.","tablet"],
+"Decline and Fall of the Roman Empire":["1776",1776,"History","Gibbon's monumental account of Rome's long collapse.","column"],
+"De Legibus":["c. 52 BCE",-52,"Political philosophy · dialogue","Cicero grounds law in nature and right reason rather than decree.","tablet"],
+"Leviathan":["1651",1651,"Political philosophy","Without a sovereign, Hobbes argues, life is solitary, poor, nasty, brutish and short.","waves"],
+"A Guide to Diplomatic Practice":["1917",1917,"Diplomacy","Satow's standing reference on the conduct of relations between states.","seal"],
+"The Civilizing Process":["1939",1939,"Sociology","Elias traces how manners, shame and self-restraint grew alongside the state.","fork"],
+"On Natural Selection":["1859",1859,"Biology","Darwin's case for evolution by natural selection.","branch"],
+"Tractatus Logico-Philosophicus":["1921",1921,"Philosophy · logic","Wittgenstein on the limits of language, and on what must be passed over in silence.","ladder"]
+};
+
+/* ---------- PUBLIC-DOMAIN ARTWORKS (Wikimedia Commons) ---------- */
+const WM = f => 'https://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(f.replace(/ /g,'_'))+'?width=900';
+const ARTS={
+  melencolia:{src:WM('Albrecht Dürer - Melencolia I - WGA07320.jpg'),cap:'Albrecht Dürer, Melencolia I, 1514. Engraving.'},
+  wanderer:{src:WM('Caspar David Friedrich - Wanderer above the sea of fog.jpg'),cap:'Caspar David Friedrich, Wanderer above the Sea of Fog, c. 1818.'},
+  dore8:{src:WM('Gustave Doré - Dante Alighieri - Inferno - Plate 8 (Canto III - Abandon all hope ye who enter here).jpg'),cap:'Gustave Doré, Inferno, Canto III, 1857.'},
+  dore1:{src:WM('Gustave Doré - Dante Alighieri - Inferno - Plate 1 (I found myself within a forest dark...).jpg'),cap:'Gustave Doré, Inferno, Canto I, 1857.'},
+  dore10:{src:WM('Gustave Doré - Dante Alighieri - Inferno - Plate 10 (Canto III - Charon herds the sinners onto his boat).jpg'),cap:'Gustave Doré, Inferno, Canto III: Charon, 1857.'}
+};
+
+/* ---------- ENGRAVED MOTIFS (original line art, 100 × 100) ---------- */
+const MOTIF={
+beetle:'<ellipse cx="50" cy="56" rx="15" ry="23"/><circle cx="50" cy="27" r="8"/><path d="M50 33V79M35 46L18 36M35 57L16 57M37 68L20 79M65 46L82 36M65 57L84 57M63 68L80 79M46 20L40 10M54 20L60 10"/>',
+root:'<path d="M50 10V45M50 45C40 55 30 60 20 85M50 45C55 60 50 75 45 90M50 45C62 55 72 62 82 84M35 64L22 66M60 70L70 72"/>',
+sun:'<circle cx="50" cy="50" r="16"/><path d="M50 14V26M50 74V86M14 50H26M74 50H86M24 24L33 33M67 67L76 76M76 24L67 33M33 67L24 76"/>',
+butterfly:'<path d="M50 30V72M50 40C38 20 14 22 18 42C20 54 38 54 50 50C62 54 80 54 82 42C86 22 62 20 50 40M50 52C40 56 26 64 32 76C36 84 46 78 50 66C54 78 64 84 68 76C74 64 60 56 50 52M50 30L44 20M50 30L56 20"/>',
+veil:'<path d="M18 14H82M22 14C26 40 18 70 26 90M36 14C40 44 32 70 40 90M64 14C60 44 68 70 60 90M78 14C74 40 82 70 74 90"/><circle cx="50" cy="44" r="8"/>',
+rose:'<path d="M50 44C44 40 44 32 50 30C58 30 60 40 52 46C42 52 36 40 42 30C50 18 66 26 64 40C62 54 44 58 36 48M50 56V90M50 72C42 66 34 68 30 74M50 80C58 74 66 76 70 82"/>',
+coil:'<path d="M12 50C12 26 28 26 28 50S44 74 44 50S60 26 60 50S76 74 76 50S92 26 92 50"/><path d="M12 50C12 70 22 74 28 50M44 50C44 70 54 74 60 50" stroke-dasharray="2 3"/>',
+flame:'<path d="M50 88C30 88 24 70 32 56C38 46 36 36 42 24C48 36 58 38 60 50C62 42 66 40 68 34C78 50 76 88 50 88ZM50 88C42 88 40 78 46 70C48 76 54 74 54 66C60 72 60 88 50 88Z"/>',
+lung:'<path d="M50 12V44M50 44L40 52M50 44L60 52M40 30C24 30 16 50 16 70C16 86 30 88 40 80C44 70 44 50 40 30ZM60 30C76 30 84 50 84 70C84 86 70 88 60 80C56 70 56 50 60 30Z"/>',
+belljar:'<path d="M28 84V44C28 24 72 24 72 44V84M22 84H78M44 18C44 12 56 12 56 18M42 84V66H58V84"/>',
+planet:'<circle cx="50" cy="50" r="20"/><ellipse cx="50" cy="50" rx="40" ry="10" transform="rotate(-18 50 50)"/><circle cx="82" cy="20" r="2"/><circle cx="16" cy="82" r="1.5"/>',
+frame:'<rect x="22" y="12" width="56" height="76"/><rect x="28" y="18" width="44" height="64"/><ellipse cx="50" cy="44" rx="11" ry="14"/><path d="M34 82C36 66 64 66 66 82"/>',
+pages:'<path d="M20 20H64L80 36V88H20ZM64 20V36H80M28 46H72M28 54H66M28 62H72M28 70H58M28 78H68"/>',
+mask:'<path d="M22 22C40 14 60 14 78 22C80 50 70 80 50 86C30 80 20 50 22 22Z"/><path d="M32 40C36 36 42 36 44 40M56 40C58 36 64 36 68 40M36 64C44 72 56 72 64 64M38 44V52M62 44V52"/>',
+labyrinth:'<path d="M14 14H86V86H14V30M26 26H74V74H26V42M38 38H62V62H38V50H50"/>',
+cap:'<path d="M18 66C18 40 36 26 54 26C72 26 82 42 82 60ZM18 66C30 70 56 72 92 64M54 26V20M38 30L42 62M66 32L64 60"/>',
+column:'<path d="M30 14H70M34 20H66M36 20V50L44 56L38 64V86M64 20V44L56 52L62 60V86M28 86H72M30 92H70"/>',
+parabola:'<path d="M12 88C30 10 70 10 88 88"/><path d="M78 60L90 80L80 76Z"/><path d="M10 88H90" stroke-dasharray="2 4"/>',
+dunes:'<path d="M8 70C28 50 40 50 56 64S82 70 92 60M8 84C24 74 44 72 60 80S84 86 92 80M8 56C22 40 34 38 44 46"/><circle cx="72" cy="28" r="9"/>',
+moon:'<path d="M62 18A34 34 0 1 0 62 82A26 26 0 1 1 62 18Z"/><path d="M76 40L78 46L84 48L78 50L76 56L74 50L68 48L74 46Z"/>',
+abyss:'<path d="M10 30H40V88M90 30H60V88M40 44H60M42 58H58M44 72H56M46 84H54"/>',
+scales:'<path d="M50 14V86M34 86H66M20 30H80M20 30L10 56H30ZM80 30L70 50H90Z"/><path d="M10 56C14 62 26 62 30 56M70 50C74 56 86 56 90 50"/>',
+clock:'<circle cx="50" cy="50" r="36"/><circle cx="50" cy="50" r="26"/><circle cx="50" cy="50" r="3"/><path d="M50 50L50 28M50 50L66 58M50 14V20M50 80V86M14 50H20M80 50H86"/>',
+maze:'<path d="M14 14H86V86H14ZM14 38H62M38 14V26M86 62H38V86M62 38V62"/><circle cx="26" cy="74" r="4"/>',
+tower:'<path d="M30 90V20H50V10H70V90M24 90H76M36 30H44M56 20H64M36 42H44M56 34H64M36 54H44M56 48H64M36 66H44M56 62H64M56 76H64"/>',
+sprout:'<path d="M50 90V46M50 60C36 60 26 50 26 36C40 36 50 46 50 60ZM50 50C60 50 72 42 72 28C58 28 50 38 50 50ZM30 90H70"/>',
+candles:'<path d="M20 86V50M35 86V40M50 86V34M65 86V40M80 86V50M14 86H86M20 44C18 40 22 36 20 32C24 36 22 40 20 44M35 34C33 30 37 26 35 22C39 26 37 30 35 34M50 28C48 24 52 20 50 16C54 20 52 24 50 28M65 34C63 30 67 26 65 22C69 26 67 30 65 34M80 44C78 40 82 36 80 32C84 36 82 40 80 44"/>',
+bolt:'<path d="M58 8L26 56H48L40 92L76 40H54Z"/>',
+rails:'<path d="M44 14L14 90M56 14L86 90M42 24H58M38 36H62M33 50H67M27 66H73M20 82H80"/>',
+island:'<path d="M8 72C20 66 30 70 40 66C52 60 62 64 72 60C80 58 88 62 92 66M10 84C24 80 40 84 50 80S76 78 90 84M52 62V30H62V60M48 30H66M52 40H62"/>',
+axe:'<path d="M30 90L70 20M60 18C74 8 90 18 88 34C80 30 70 34 64 42Z"/>',
+blossom:'<circle cx="50" cy="50" r="6"/><path d="M50 44C40 30 44 16 50 14C56 16 60 30 50 44M56 48C70 40 82 46 84 52C82 58 68 62 56 52M54 56C62 70 58 84 52 86C46 84 44 70 48 56M46 56C38 70 26 72 20 68C20 60 32 52 44 52M44 46C30 40 24 30 28 24C34 22 44 32 48 44"/>',
+brush:'<path d="M78 14L42 62M42 62C34 58 24 64 24 74C24 82 18 86 14 88C30 90 46 84 48 70C50 66 46 62 42 62"/>',
+eye:'<path d="M8 50C26 24 74 24 92 50C74 76 26 76 8 50Z"/><circle cx="50" cy="50" r="14"/><circle cx="50" cy="50" r="5"/>',
+eyeX:'<path d="M8 50C26 24 74 24 92 50C74 76 26 76 8 50Z"/><circle cx="50" cy="50" r="14"/><path d="M26 26L74 74M74 26L26 74"/>',
+rings:'<circle cx="38" cy="54" r="20"/><circle cx="62" cy="54" r="20"/><path d="M58 26L62 20L66 26L62 32Z"/>',
+cloudswirl:'<path d="M16 64C8 64 8 50 18 50C18 38 34 36 38 44C42 32 62 32 64 46C74 42 86 50 80 62C88 66 84 76 74 74H22C14 74 12 66 16 64ZM40 60C40 54 48 54 48 60C48 64 42 64 42 60"/>',
+kite:'<path d="M50 10L76 40L50 78L24 40ZM50 10V78M24 40H76M50 78C44 84 56 88 48 94"/>',
+tree:'<path d="M44 90C48 70 46 54 38 40M46 64C54 52 66 44 84 40M38 40C30 30 20 26 12 26M42 48C34 44 24 46 18 50M60 50C66 38 76 32 86 30M14 90H80"/>',
+arch:'<path d="M18 90V44C18 20 82 20 82 44V90M30 90V46C30 30 70 30 70 46V90M44 26L50 16L56 26M12 90H88"/>',
+plate:'<circle cx="50" cy="50" r="30"/><circle cx="50" cy="50" r="20"/><path d="M12 22V44C12 48 20 48 20 44V22M16 44V86M88 22C80 30 80 46 86 50V86"/>',
+hourglass:'<path d="M26 12H74M26 88H74M32 12C32 38 50 42 50 50C50 58 32 62 32 88M68 12C68 38 50 42 50 50C50 58 68 62 68 88M42 80H58L50 70Z"/>',
+bars:'<rect x="18" y="14" width="64" height="72"/><path d="M30 14V86M42 14V86M54 14V86M66 14V86M18 40H82"/>',
+cloth:'<path d="M22 24C40 18 56 30 76 22C72 42 82 60 76 80C58 72 42 86 24 78C30 60 18 42 22 24Z"/><path d="M34 40C44 38 52 44 62 40M34 60C44 58 52 64 62 60"/>',
+fish:'<path d="M14 50C30 34 60 34 76 50C60 66 30 66 14 50ZM76 50L90 38V62Z"/><path d="M26 50H74M34 42V58M44 40V60M54 40V60M64 43V57"/><circle cx="22" cy="48" r="2"/>',
+lotus:'<path d="M50 72C40 60 40 40 50 24C60 40 60 60 50 72ZM50 72C34 70 24 56 22 40C36 42 46 56 50 72ZM50 72C66 70 76 56 78 40C64 42 54 56 50 72ZM14 78C30 72 70 72 86 78"/>',
+ship:'<path d="M14 66H86L76 80H24ZM50 66V14M50 18L76 58H50M50 24L28 58H50M10 88C24 84 38 92 50 88S76 84 90 88"/>',
+hut:'<path d="M16 50L50 20L84 50M24 44V86H76V44M44 86V64H56V86M12 90H88"/>',
+clouds:'<path d="M10 44C10 34 22 32 26 38C28 28 44 28 46 38C54 34 62 40 58 48H12C10 48 10 46 10 44ZM38 74C38 64 50 62 54 68C56 58 72 58 74 68C82 64 90 70 86 78H40C38 78 38 76 38 74ZM60 22H84M14 62H32"/>',
+gem:'<path d="M26 36L38 22H62L74 36L50 80ZM26 36H74M38 22L44 36L50 80L56 36L62 22M50 8V14M86 50H90M10 50H14"/>',
+sword:'<path d="M50 8L56 20V66H44V20ZM30 66H70M50 66V84M44 84H56V92H44Z"/>',
+lantern:'<path d="M50 8V16M40 16H60M36 22H64L60 78H40ZM36 22C30 40 30 60 40 78M64 22C70 40 70 60 60 78M40 78H60L56 86H44ZM46 44C44 50 48 56 50 58C52 56 56 50 54 44C52 48 50 46 50 40C48 44 46 42 46 44"/>',
+bow:'<path d="M30 10C66 30 66 70 30 90M30 10V90M18 50H88M88 50L78 44M88 50L78 56M22 50L16 44M22 50L16 56"/>',
+windmill:'<path d="M44 90L48 44H56L60 90M40 90H64M52 44L20 20M52 44L84 18M52 44L82 72M52 44L22 74M28 26L20 34M78 22L86 30M76 72L84 64M28 70L20 62"/>',
+scroll:'<path d="M26 14H78V76C78 84 70 88 66 84V26H26ZM26 14C18 14 18 26 26 26M66 84H22C14 84 14 72 22 72H66M34 38H58M34 48H58M34 58H52"/>',
+cup:'<path d="M16 34H84C84 50 70 58 58 58H42C30 58 16 50 16 34ZM50 58V80M34 86H66M16 34C8 34 8 44 16 44M84 34C92 34 92 44 84 44"/>',
+quill:'<path d="M84 12C54 18 30 42 22 88M84 12C80 36 62 54 34 64M84 12C70 24 56 40 46 56M22 88L30 76M14 90H40"/>',
+quills2:'<path d="M80 12C60 30 40 60 26 90M80 12C78 34 64 52 44 60M20 12C40 30 60 60 74 90M20 12C22 34 36 52 56 60"/>',
+watch:'<circle cx="50" cy="56" r="30"/><circle cx="50" cy="56" r="3"/><path d="M50 26V16M44 12H56M50 56V36M50 56L64 64M50 30V34M76 56H72M50 82V78M24 56H28"/>',
+axes:'<path d="M18 86V12M14 82H90M18 12L14 20M18 12L22 20M90 82L82 78M90 82L82 86"/><circle cx="62" cy="36" r="3"/><path d="M62 36V82M62 36H18" stroke-dasharray="3 3"/>',
+crown:'<path d="M14 78L20 30L36 54L50 22L64 54L80 30L86 78ZM14 88H86"/><circle cx="20" cy="26" r="3"/><circle cx="50" cy="18" r="3"/><circle cx="80" cy="26" r="3"/>',
+bamboo:'<path d="M16 22H84V78H16ZM28 22V78M40 22V78M52 22V78M64 22V78M76 22V78M10 30H16M10 70H16M84 30H90M84 70H90"/>',
+coin:'<circle cx="42" cy="58" r="26"/><circle cx="42" cy="58" r="19"/><path d="M42 46V70M36 52H48M36 64H48"/><ellipse cx="68" cy="30" rx="20" ry="8"/><path d="M48 30V38C48 42 88 42 88 38V30"/>',
+stars:'<path d="M16 70L34 48L52 56L66 30L84 38M52 56L60 80"/><circle cx="16" cy="70" r="3"/><circle cx="34" cy="48" r="3"/><circle cx="52" cy="56" r="3"/><circle cx="66" cy="30" r="3"/><circle cx="84" cy="38" r="3"/><circle cx="60" cy="80" r="3"/>',
+waves:'<path d="M8 40C20 20 32 20 44 40S68 60 80 40S92 30 96 36M8 64C20 44 32 44 44 64S68 84 80 64S92 54 96 60"/>',
+spears:'<path d="M16 90L80 14M84 90L20 14M80 14L72 16L78 22ZM20 14L28 16L22 22Z"/><circle cx="50" cy="52" r="14"/>',
+syntax:'<path d="M50 14L28 40M50 14L72 40M28 40L16 70M28 40L40 70M72 40L60 70M72 40L84 70M10 80H22M34 80H46M54 80H66M78 80H90"/><circle cx="50" cy="14" r="4"/><circle cx="28" cy="40" r="4"/><circle cx="72" cy="40" r="4"/>',
+curve:'<path d="M14 86V12M14 86H90M20 24C40 40 60 70 88 78M20 80C40 64 60 36 86 22"/><circle cx="53" cy="51" r="3"/>',
+eyecube:'<path d="M30 40L50 30L70 40V64L50 74L30 64ZM30 40L50 50L70 40M50 50V74M14 20C22 12 34 12 42 20C34 28 22 28 14 20Z"/><circle cx="28" cy="20" r="3"/>',
+tablet:'<path d="M24 86V34C24 14 76 14 76 34V86ZM34 40H66M34 50H66M34 60H66M34 70H58"/>',
+seal:'<circle cx="50" cy="42" r="26"/><circle cx="50" cy="42" r="18"/><path d="M36 64L28 92L42 84L50 94M64 64L72 92L58 84L50 94M50 30L54 40H64L56 46L59 56L50 50L41 56L44 46L36 40H46Z"/>',
+fork:'<path d="M40 12V36C40 44 60 44 60 36V12M46 12V34M54 12V34M50 42V90"/>',
+branch:'<path d="M50 90V62M50 62L30 42M50 62L70 46M30 42L18 26M30 42L38 22M70 46L62 26M70 46L86 34M62 26L56 12M62 26L70 12"/><circle cx="18" cy="26" r="2.5"/><circle cx="38" cy="22" r="2.5"/><circle cx="56" cy="12" r="2.5"/><circle cx="70" cy="12" r="2.5"/><circle cx="86" cy="34" r="2.5"/>',
+ladder:'<path d="M34 90L42 10M66 90L58 10M36 74H64M38 58H62M40 42H60M41 26H59"/>',
+iceberg:'<path d="M8 40H92M38 40L46 22L54 28L62 40M30 40L22 64L34 86L60 90L78 70L70 40"/><path d="M14 48H22M80 48H90M12 56H18" stroke-dasharray="2 3"/>',
+bastille:'<path d="M22 90V30H36V22H44V30H56V22H64V30H78V90M16 90H84M42 90V70C42 60 58 60 58 70V90M30 44H38M62 44H70"/>'
+};
+
+const disciplines=['Statistics','Learning','Agents','Retrieval','Pipelines','Cloud & IaC','Systems'];
+const PROJECTS=[
+ {id:'nexus',name:'Data Craft Nexus',repo:'https://github.com/Aeternifrigus/Data-Craft-Nexus',site:'https://aeternifrigus.github.io/Data-Craft-Nexus/',kind:'Taxonomy engine · client-side',
+  body:'Read a dataset\'s six coordinates, then prescribe the models, drift checkers and pipelines that fit its signature. Every code is clickable, down to the formula. 100% client-side.',
+  plain:'In plain terms: describe your data along six axes and it tells you which model to use, how to watch it for drift, and why.',
+  facts:['80+ formulas','60+ models','28 drift checkers','14 pipelines','6 axes, codes A11 to A64'],cov:{Statistics:2,Learning:2,Pipelines:2},fig:'nexus'},
+ {id:'supply',name:'Supply Chain Decision Lab',repo:'https://github.com/Aeternifrigus/supply-chain-decision-lab',kind:'Survival analysis · reinforcement learning · Azure ML',
+  body:'Applied survival analysis (Kaplan-Meier, log-rank, Cox PH), from-scratch Q-learning with paired significance testing, and Azure ML SDK v2 pipelines.',
+  plain:'In plain terms: how long until a shipment fails, whether two groups really differ, and a learned policy that is tested against chance rather than trusted on sight.',
+  facts:['Kaplan-Meier','log-rank','Cox PH','Q-learning from scratch','32 tests','4 real bugs documented with fixes'],cov:{Statistics:2,Learning:2,Pipelines:1,'Cloud & IaC':1},fig:'km'},
+ {id:'mcp',name:'MCP Tools Server',repo:'https://github.com/Aeternifrigus/mcp-tools-server',kind:'Model Context Protocol · statistical tooling',
+  body:'A real MCP server exposing statistical tools (survival analysis, paired significance testing, drift detection) over the official protocol, with a quality, latency and cost evaluation harness.',
+  plain:'In plain terms: a language model can call rigorous statistics as tools, and the harness measures whether doing so is accurate, fast and affordable.',
+  facts:['official MCP protocol','survival analysis','paired significance','drift detection','18 tests'],cov:{Statistics:2,Agents:2,Systems:1},fig:'mcp'},
+ {id:'netops',name:'NetOps Agent Platform',repo:'https://github.com/Aeternifrigus/netops-agent-platform',kind:'Multi-agent · Google ADK · from-scratch networks',
+  body:'Multi-agent network operations assistant on Google ADK: topology-graph traversal (Neo4j or in-memory), a from-scratch NumPy MLP with a gradient-checked backward pass, and self-attention built from scratch.',
+  plain:'In plain terms: agents that reason over a network map to find what is connected to what, built on neural pieces written by hand rather than imported.',
+  facts:['Google ADK','Neo4j','NumPy MLP','gradient check','self-attention','K8s manifests','GitLab + GitHub CI'],cov:{Learning:2,Agents:2,'Cloud & IaC':1,Systems:1},fig:'netops'},
+ {id:'rag',name:'GenAI RAG Service',repo:'https://github.com/Aeternifrigus/GenAI_Rag_serv',kind:'Retrieval · FastAPI microservice',
+  body:'Multi-source RAG microservice on FastAPI, pgvector and MongoDB. A retrieval agent with source routing and rank fusion, citation-grounded answers, and an evaluation harness that scores retrieval and faithfulness separately.',
+  plain:'In plain terms: it finds evidence in more than one store, merges the rankings, and answers only with what it can cite.',
+  facts:['FastAPI','pgvector','MongoDB','source routing','rank fusion','retrieval vs faithfulness evals'],cov:{Retrieval:2,Agents:1,Systems:2},fig:'rrf'},
+ {id:'freight',name:'Freight MLOps Quickstart',repo:'https://github.com/Aeternifrigus/freight-mlops-quickstart',kind:'PySpark · AWS · Terraform',
+  body:'End-to-end MLOps pipeline: PySpark ETL with groupBy and window feature engineering, a scikit-learn RandomForest classifier, and two deployment paths, AWS Lambda (container image with Terraform) and a SageMaker real-time endpoint.',
+  plain:'In plain terms: it predicts whether freight will be late using only what is known at booking, so the model never peeks at the future.',
+  facts:['PySpark','window features','RandomForest','AWS Lambda','Terraform','SageMaker','no leakage'],cov:{Learning:1,Pipelines:2,'Cloud & IaC':2},fig:'freight'},
+ {id:'tradeflow',name:'TradeFlow ML',repo:'https://github.com/Aeternifrigus/tradeflow-ML-V1',kind:'Forecasting · MLOps · GCP',
+  body:'An end-to-end MLOps pipeline that predicts landed cost, shipping demand and currency exposure for import-export operations.',
+  plain:'In plain terms: three numbers a trader cares about before a container leaves port, forecast from one pipeline.',
+  facts:['XGBoost','MLflow','FastAPI','Docker','GitHub Actions','Terraform on GCP','agentic document parsing'],cov:{Learning:2,Agents:1,Pipelines:2,'Cloud & IaC':2},fig:'tradeflow'},
+ {id:'lancer',name:'Lancer Reliquary',repo:'https://github.com/Aeternifrigus/lancer_reliquary',kind:'Game backend · TypeScript · C++',
+  body:'Multiplayer game backend platform with a TypeScript REST API and a C++ client: JWT auth, session management, ELO leaderboards, inventory systems and MongoDB persistence.',
+  plain:'In plain terms: the machinery behind an online game, from logging in to ranking players fairly.',
+  facts:['TypeScript REST','C++ client','JWT','sessions','ELO','inventory','MongoDB'],cov:{Statistics:1,Systems:2},fig:'elo'}
+];
+
+
+/* ---------- figures ---------- */
+function FIGS_bar(n,left,btn){return `<div class="fig-bar"><span>Fig. 2.${n} &nbsp; ${left}</span>${btn?`<button class="fig-btn">${btn}</button>`:''}</div>`}
+var FIGS={
+ nexus(fig,n){
+  let seed=7;
+  function render(){
+    const r=mulberry32(seed),vals=Array.from({length:6},()=>1+Math.floor(r()*4)),code=vals.map((v,i)=>`A${i+1}${v}`).join(' ');
+    const cx=150,cy=150,R=105;let s='';
+    for(let k=1;k<=4;k++){s+=`<polygon points="${[...Array(6)].map((_,i)=>{const a=-Math.PI/2+i*Math.PI/3;return `${cx+R*k/4*Math.cos(a)},${cy+R*k/4*Math.sin(a)}`}).join(' ')}" fill="none" stroke="${C.rule}" />`}
+    for(let i=0;i<6;i++){const a=-Math.PI/2+i*Math.PI/3;s+=`<line x1="${cx}" y1="${cy}" x2="${cx+R*Math.cos(a)}" y2="${cy+R*Math.sin(a)}" stroke="${C.rule}"/>`+t(cx+(R+16)*Math.cos(a),cy+(R+16)*Math.sin(a)+4,'A'+(i+1),{anchor:'middle',fill:C.text})}
+    const poly=vals.map((v,i)=>{const a=-Math.PI/2+i*Math.PI/3;return [cx+R*v/4*Math.cos(a),cy+R*v/4*Math.sin(a)]});
+    s+=`<polygon points="${poly.map(p=>p.join(',')).join(' ')}" fill="rgba(201,160,100,.16)" stroke="${C.brass}" stroke-width="1.5"/>`;
+    poly.forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${C.brass}"/>`);
+    s+=t(cx,288,code,{anchor:'middle',fill:C.brass,size:11});
+    // right: inventory bars (stated counts)
+    const inv=[['formulas',80],['models',60],['drift checkers',28],['pipelines',14]];const x0=320,w=140;
+    s+=t(x0,48,'what it prescribes from',{cls:'svgs',size:15,italic:true});
+    inv.forEach((d,i)=>{const y=78+i*50;s+=t(x0,y,d[0],{size:9.5})+`<rect x="${x0}" y="${y+7}" width="${w}" height="10" fill="${C.rule}"/><rect x="${x0}" y="${y+7}" width="${w*d[1]/80}" height="10" fill="${i===0?C.brass:C.steel}"/>`+t(x0+w,y,(d[1]>=60?d[1]+'+':d[1]),{anchor:'end',fill:C.text})});
+    fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="Six-axis dataset signature and taxonomy inventory">${s}</svg>`+FIGS_bar(n,'a dataset signature on six axes','Read another dataset')+`<p class="fig-cap">Each axis takes one of four classes, so a dataset is a point in a space of 4⁶ = 4096 signatures.</p>`;
+    fig.querySelector('.fig-btn').onclick=()=>{seed++;render()};
+  }render();
+ },
+ km(fig,n){
+  let seed=11;
+  function sample(r,lam,N){const out=[];for(let i=0;i<N;i++){const T=-Math.log(1-r())/lam,Cc=8+r()*34;out.push({t:Math.min(T,Cc,40),e:T<=Cc&&T<=40})}return out.sort((a,b)=>a.t-b.t)}
+  function km(d){let n=d.length,S=1;const steps=[[0,1]],cens=[];let i=0;while(i<d.length){const tt=d[i].t;let dd=0,c=0;while(i<d.length&&d[i].t===tt){d[i].e?dd++:c++;i++}if(dd){steps.push([tt,S]);S*=1-dd/n;steps.push([tt,S])}if(c)cens.push([tt,S]);n-=dd+c}return{steps,cens,S}}
+  function logrank(a,b){const all=[...a.map(x=>({...x,g:0})),...b.map(x=>({...x,g:1}))].sort((p,q)=>p.t-q.t);let n0=a.length,n1=b.length,O=0,E=0,V=0,i=0;while(i<all.length){const tt=all[i].t;let d0=0,d1=0,c0=0,c1=0;while(i<all.length&&all[i].t===tt){const x=all[i];if(x.e){x.g?d1++:d0++}else{x.g?c1++:c0++}i++}const d=d0+d1,nn=n0+n1;if(d&&nn>1){O+=d0;E+=d*n0/nn;V+=d*(n0/nn)*(n1/nn)*(nn-d)/(nn-1)}n0-=d0+c0;n1-=d1+c1}return V?(O-E)**2/V:0}
+  function render(){
+    const r=mulberry32(seed),A=sample(r,.045,45),B=sample(r,.085,45),ka=km(A),kb=km(B),chi=logrank(A,B);
+    const x0=52,y0=24,w=400,h=220,X=v=>x0+v/40*w,Y=v=>y0+(1-v)*h;let s=grid(x0,y0,w,h,8,4);
+    [0,.25,.5,.75,1].forEach(v=>s+=t(x0-8,Y(v)+3,v.toFixed(2),{anchor:'end'}));[0,10,20,30,40].forEach(v=>s+=t(X(v),y0+h+15,v,{anchor:'middle'}));
+    s+=t(x0+w/2,y0+h+32,'days in transit',{anchor:'middle'})+t(x0,y0-8,'S(t)',{anchor:'middle',fill:C.text});
+    const path=(k,col)=>{let d=k.steps.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');d+=`L${X(40)} ${Y(k.S)}`;let o=`<path d="${d}" fill="none" stroke="${col}" stroke-width="1.6"/>`;k.cens.forEach(c=>o+=`<line x1="${X(c[0])}" y1="${Y(c[1])-4}" x2="${X(c[0])}" y2="${Y(c[1])+4}" stroke="${col}"/>`);return o};
+    s+=path(ka,C.steel)+path(kb,C.brass);
+    s+=`<line x1="${x0+w-150}" y1="${y0+14}" x2="${x0+w-132}" y2="${y0+14}" stroke="${C.steel}" stroke-width="2"/>`+t(x0+w-126,y0+18,'lane A, λ = 0.045',{fill:C.text});
+    s+=`<line x1="${x0+w-150}" y1="${y0+30}" x2="${x0+w-132}" y2="${y0+30}" stroke="${C.brass}" stroke-width="2"/>`+t(x0+w-126,y0+34,'lane B, λ = 0.085',{fill:C.text});
+    fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="Kaplan-Meier survival curves for two simulated cohorts">${s}</svg>`+FIGS_bar(n,`log-rank χ²₁ = <b>${chi.toFixed(2)}</b> ${chi>3.84?'· differ at α = 0.05':'· not distinguishable at α = 0.05'}`,'Resample cohorts')+`<p class="fig-cap">Kaplan-Meier estimates on simulated shipments, recomputed in your browser. Ticks mark censored observations.</p>`;
+    fig.querySelector('.fig-btn').onclick=()=>{seed++;render()};
+  }render();
+ },
+ mcp(fig,n){
+  let s='';
+  s+=box(16,40,110,54,'Model client',{sub:'LLM host'});
+  s+=arrow(126,60,176,60,{color:C.brass})+arrow(176,76,126,76,{color:C.steel});
+  s+=t(151,52,'call',{anchor:'middle',size:8.5})+t(151,90,'result',{anchor:'middle',size:8.5});
+  s+=box(176,30,120,74,'MCP server',{sub:'official protocol',stroke:C.brass});
+  const tools=[['Survival analysis',24],['Paired significance',72],['Drift detection',120]];
+  tools.forEach(([nm,y])=>{s+=arrow(296,67,338,y+17)+box(338,y,128,34,nm,{size:13.5})});
+  // evaluation triangle
+  const tx=240,ty=178,R=80;const P=[[tx,ty],[tx-92,ty+100],[tx+92,ty+100]];
+  s+=`<polygon points="${P.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${C.rule2}"/>`;
+  for(let k=1;k<3;k++){const q=P.map(p=>[tx+(p[0]-tx)*k/3,ty+67+(p[1]-ty-67)*k/3]);}
+  s+=`<line x1="${tx}" y1="${ty}" x2="${tx}" y2="${ty+100}" stroke="${C.rule}" stroke-dasharray="2 3"/>`;
+  s+=t(P[0][0],P[0][1]-8,'quality',{anchor:'middle',fill:C.text})+t(P[1][0]-6,P[1][1]+4,'latency',{anchor:'end',fill:C.text})+t(P[2][0]+6,P[2][1]+4,'cost',{fill:C.text});
+  s+=t(24,196,'Evaluation harness',{cls:'svgs',size:16,italic:true})+t(24,214,'every tool call is scored',{size:9})+t(24,228,'on all three axes at once',{size:9});
+  s+=`<circle id="mcpPt" cx="${tx}" cy="${ty+62}" r="5" fill="${C.brass}"/>`;
+  s+=t(466,288,'18 tests',{anchor:'end',fill:C.brass});
+  fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="MCP architecture and evaluation axes">${s}</svg>`+FIGS_bar(n,'request path and the trade-off it is judged on')+`<p class="fig-cap">A tool that is accurate but slow, or fast but expensive, sits away from the centre. The harness makes that position measurable.</p>`;
+ },
+ netops(fig,n){
+  const nodes=[['core-1',60,70],['core-2',60,190],['agg-a',150,40],['agg-b',150,130],['agg-c',150,220],['edge-1',230,70],['edge-2',230,160],['fw',215,250],['dns',120,275]];
+  const E=[[0,1],[0,2],[0,3],[1,3],[1,4],[2,5],[3,5],[3,6],[4,6],[4,7],[1,8]];
+  let src=0;
+  const adj=nodes.map(()=>[]);E.forEach(([a,b])=>{adj[a].push(b);adj[b].push(a)});
+  let aseed=3;
+  function attn(){const r=mulberry32(aseed),N=6,d=8,X=[...Array(N)].map(()=>[...Array(d)].map(()=>gauss(r))),Wq=[...Array(d)].map(()=>[...Array(d)].map(()=>gauss(r)*.5)),Wk=[...Array(d)].map(()=>[...Array(d)].map(()=>gauss(r)*.5));const mul=(v,M)=>M.map(row=>row.reduce((s,m,j)=>s+m*v[j],0));const Q=X.map(v=>mul(v,Wq)),K=X.map(v=>mul(v,Wk));return Q.map(q=>{const z=K.map(k=>k.reduce((s,kk,j)=>s+kk*q[j],0)/Math.sqrt(d));const mx=Math.max(...z),ex=z.map(v=>Math.exp(v-mx)),sm=ex.reduce((a,b)=>a+b,0);return ex.map(v=>v/sm)})}
+  function render(){
+    const dist=nodes.map(()=>-1);dist[src]=0;const qq=[src];while(qq.length){const u=qq.shift();adj[u].forEach(v=>{if(dist[v]<0){dist[v]=dist[u]+1;qq.push(v)}})}
+    const maxd=Math.max(...dist);
+    let g=`<svg viewBox="0 0 280 300" role="img" aria-label="Network topology with breadth-first traversal">`;
+    E.forEach(([a,b])=>{const hot=Math.abs(dist[a]-dist[b])===1;g+=`<line x1="${nodes[a][1]}" y1="${nodes[a][2]}" x2="${nodes[b][1]}" y2="${nodes[b][2]}" stroke="${hot?C.brassD:C.rule2}" stroke-width="${hot?1.3:1}"/>`});
+    nodes.forEach(([nm,x,y],i)=>{const k=dist[i]/maxd;const col=i===src?C.brass:`rgba(110,155,176,${1-k*.65})`;g+=`<g class="nd" data-i="${i}" style="cursor:pointer" tabindex="0" role="button" aria-label="Start traversal at ${nm}"><circle cx="${x}" cy="${y}" r="15" fill="${C.ink}" stroke="${col}" stroke-width="${i===src?2:1.2}"/>${t(x,y+4,dist[i],{anchor:'middle',fill:i===src?C.brass:C.text,size:11})}${t(x,y-20,nm,{anchor:'middle',size:8.5})}</g>`});
+    g+='</svg>';
+    const A=attn(),toks=['core','agg','edge','fw','dns','lb'];const cs=30,ox=52,oy=40;
+    let a=`<svg viewBox="0 0 280 300" role="img" aria-label="Self-attention weight matrix">`;
+    A.forEach((row,i)=>row.forEach((v,j)=>{a+=`<rect x="${ox+j*cs}" y="${oy+i*cs}" width="${cs-2}" height="${cs-2}" fill="${C.brass}" fill-opacity="${(.06+.94*v).toFixed(3)}"><title>${toks[i]} attends to ${toks[j]}: ${v.toFixed(3)}</title></rect>`}));
+    toks.forEach((tk,i)=>{a+=t(ox-6,oy+i*cs+19,tk,{anchor:'end',size:9})+t(ox+i*cs+14,oy-8,tk,{anchor:'middle',size:9})});
+    a+=t(140,245,'softmax(QKᵀ / √d), d = 8',{anchor:'middle',fill:C.text,size:10.5})+t(140,262,'each row sums to 1',{anchor:'middle',size:9})+'</svg>';
+    fig.innerHTML=`<div class="fig-split"><div>${g}</div><div>${a}</div></div>`+FIGS_bar(n,`hops from <b>${nodes[src][0]}</b> · attention over 6 tokens`,'New tokens')+`<p class="fig-cap">Select a device to run breadth-first traversal from it. The matrix is a from-scratch self-attention pass on random embeddings; hover a cell for its weight.</p>`;
+    fig.querySelectorAll('.nd').forEach(nd=>{const go=()=>{src=+nd.dataset.i;render()};nd.onclick=go;nd.onkeydown=e=>{if(e.key==='Enter')go()}});
+    fig.querySelector('.fig-btn').onclick=()=>{aseed++;render()};
+  }render();
+ },
+ rrf(fig,n){
+  let seed=5;const k=60;
+  function render(){
+    const r=mulberry32(seed),docs=['d1','d2','d3','d4','d5','d6','d7','d8'];
+    const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+    const A=shuf(docs).slice(0,5),B=shuf(docs).slice(0,5);const sc={};
+    A.forEach((d,i)=>sc[d]=(sc[d]||0)+1/(k+i+1));B.forEach((d,i)=>sc[d]=(sc[d]||0)+1/(k+i+1));
+    const F=Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,5);const top=F[0][1];
+    let s=t(20,26,'pgvector · dense',{fill:C.steel})+t(170,26,'MongoDB · documents',{fill:C.steel})+t(330,26,'fused',{fill:C.brass});
+    const yA=i=>50+i*44;
+    A.forEach((d,i)=>{s+=`<rect x="20" y="${yA(i)-14}" width="100" height="26" fill="${C.ink}" stroke="${C.rule2}"/>`+t(30,yA(i)+3,(i+1)+'.',{size:9})+t(58,yA(i)+4,d,{fill:C.text,size:12})});
+    B.forEach((d,i)=>{s+=`<rect x="170" y="${yA(i)-14}" width="100" height="26" fill="${C.ink}" stroke="${C.rule2}"/>`+t(180,yA(i)+3,(i+1)+'.',{size:9})+t(208,yA(i)+4,d,{fill:C.text,size:12})});
+    let ln='';F.forEach(([d,v],i)=>{const y=yA(i);const ia=A.indexOf(d),ib=B.indexOf(d);
+      if(ia>=0)ln+=`<path d="M120 ${yA(ia)} C 230 ${yA(ia)}, 250 ${y}, 330 ${y}" fill="none" stroke="${C.steel}" stroke-opacity=".45"/>`;
+      if(ib>=0)ln+=`<path d="M270 ${yA(ib)} C 300 ${yA(ib)}, 305 ${y}, 330 ${y}" fill="none" stroke="${C.steel}" stroke-opacity=".45"/>`;
+      s+=`<rect x="330" y="${y-14}" width="${130*v/top}" height="26" fill="rgba(201,160,100,${ia>=0&&ib>=0?.32:.14})" stroke="${C.brassD}"/>`+t(338,y+4,d,{fill:C.text,size:12})+t(456,y+4,v.toFixed(4),{anchor:'end',size:9})});
+    s=ln+s;s+=t(240,286,'RRF(d) = Σ over sources of 1 / (k + rank(d)),  k = 60',{anchor:'middle',fill:C.text,size:10.5});
+    fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="Reciprocal rank fusion of two ranked lists">${s}</svg>`+FIGS_bar(n,'reciprocal rank fusion, computed live','Rerun retrieval')+`<p class="fig-cap">A document found by both sources outranks one found high by only one. Brighter bars mark agreement.</p>`;
+    fig.querySelector('.fig-btn').onclick=()=>{seed++;render()};
+  }render();
+ },
+ freight(fig,n){
+  let s='';
+  s+=box(10,30,84,48,'Bookings',{sub:'raw',size:14})+arrow(94,54,112,54);
+  s+=box(112,30,104,48,'PySpark ETL',{sub:'groupBy · window',size:14,stroke:C.steel})+arrow(216,54,234,54);
+  s+=box(234,30,96,48,'RandomForest',{sub:'scikit-learn',size:13.5})+arrow(330,48,352,30)+arrow(330,60,352,80);
+  s+=box(352,8,118,42,'AWS Lambda',{sub:'container, Terraform',size:13,stroke:C.brass});
+  s+=box(352,60,118,42,'SageMaker',{sub:'real-time endpoint',size:13.5,stroke:C.brass});
+  const y=200,x0=30,x1=450,cut=250;
+  s+=t(x0,140,'The information boundary',{cls:'svgs',size:17,italic:true});
+  s+=`<rect x="${x0}" y="${y-22}" width="${cut-x0}" height="44" fill="rgba(110,155,176,.09)"/><rect x="${cut}" y="${y-22}" width="${x1-cut}" height="44" fill="rgba(165,71,60,.08)"/>`;
+  s+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.rule2}"/>`;
+  s+=`<line x1="${cut}" y1="${y-40}" x2="${cut}" y2="${y+40}" stroke="${C.brass}" stroke-width="1.5"/>`+t(cut,y+56,'booking made',{anchor:'middle',fill:C.brass});
+  [[60,'lane'],[112,'lead time'],[165,'history'],[218,'carrier']].forEach(([x,l],i)=>{s+=`<circle cx="${x}" cy="${y}" r="4" fill="${C.steel}"/>`+t(x,i%2?y+18:y-10,l,{anchor:'middle',size:8.5})});
+  [[292,'departure'],[360,'in transit'],[425,'arrival']].forEach(([x,l],i)=>{s+=`<circle cx="${x}" cy="${y}" r="4" fill="none" stroke="${C.ox}"/><line x1="${x-5}" y1="${y-5}" x2="${x+5}" y2="${y+5}" stroke="${C.ox}"/>`+t(x,i%2?y+18:y-10,l,{anchor:'middle',size:8.5})});
+  s+=t(x0,y+56,'used for features',{fill:C.steel})+t(x1,y+56,'excluded, would leak',{anchor:'end',fill:C.ox});
+  fig.innerHTML=`<svg viewBox="0 0 480 280" role="img" aria-label="Pipeline and leakage boundary">${s}</svg>`+FIGS_bar(n,'pipeline and the line features may not cross')+`<p class="fig-cap">Field names on the timeline are illustrative categories. The rule is exact: nothing after the booking enters the model.</p>`;
+ },
+ tradeflow(fig,n){
+  let s='';
+  const row=[['Synthetic data','generator'],['ETL','pipeline'],['XGBoost','tracked in MLflow'],['FastAPI','in Docker']];
+  row.forEach(([a,b],i)=>{const x=14+i*118;s+=box(x,30,100,50,a,{sub:b,size:14,stroke:i===2?C.brass:C.rule2});if(i<3)s+=arrow(x+100,55,x+118,55)});
+  s+=`<rect x="14" y="98" width="454" height="26" fill="none" stroke="${C.rule}" stroke-dasharray="3 3"/>`+t(241,115,'GitHub Actions CI/CD  ·  Terraform on GCP',{anchor:'middle',size:9.5,fill:C.text});
+  // three heads
+  const heads=[['Landed cost',C.brass],['Shipping demand',C.steel],['Currency exposure',C.ox]];
+  heads.forEach(([h,col],i)=>{const x=40+i*150,y=178;s+=`<line x1="${282+50}" y1="80" x2="${x+55}" y2="${y-24}" stroke="${C.rule2}"/>`;
+    // sparkline shape, illustrative
+    let d='';for(let k=0;k<=40;k++){const xx=x+k*2.75,yy=y+8-14*Math.sin(k/6+i)*Math.exp(-k/60)-k*.12*(i-1);d+=(k?'L':'M')+xx.toFixed(1)+' '+yy.toFixed(1)}
+    s+=`<rect x="${x-8}" y="${y-24}" width="126" height="78" fill="${C.ink}" stroke="${C.rule2}"/>`+`<path d="${d}" fill="none" stroke="${col}" stroke-width="1.4"/>`+t(x+55,y+44,h,{anchor:'middle',cls:'svgs',size:14})});
+  s+=box(14,254,454,32,'Agentic document parsing  (Claude API)',{size:14,stroke:C.steel});
+  s+=arrow(241,254,241,236,{color:C.steel,dash:true});
+  fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="TradeFlow pipeline with three forecast targets">${s}</svg>`+FIGS_bar(n,'one pipeline, three forecast targets')+`<p class="fig-cap">Curve shapes are schematic; the diagram shows structure, not results.</p>`;
+ },
+ elo(fig,n){
+  const x0=50,y0=24,w=260,h=210,X=d=>x0+(d+800)/1600*w,Y=e=>y0+(1-e)*h,E=d=>1/(1+Math.pow(10,-d/400));
+  let s=grid(x0,y0,w,h,8,4);let d='';for(let k=-800;k<=800;k+=10)d+=(k===-800?'M':'L')+X(k).toFixed(1)+' '+Y(E(k)).toFixed(1);
+  s+=`<path d="${d}" fill="none" stroke="${C.brass}" stroke-width="1.8"/>`;
+  [0,.5,1].forEach(v=>s+=t(x0-6,Y(v)+3,v,{anchor:'end'}));[-800,-400,0,400,800].forEach(v=>s+=t(X(v),y0+h+14,v,{anchor:'middle'}));
+  s+=t(x0+w/2,y0+h+30,'rating difference Rₐ − R_b',{anchor:'middle'});
+  s+=`<g id="eloHover"><line id="eloL" x1="${X(0)}" y1="${y0}" x2="${X(0)}" y2="${y0+h}" stroke="${C.steel}" stroke-dasharray="3 3"/><circle id="eloC" cx="${X(0)}" cy="${Y(.5)}" r="4.5" fill="${C.ink}" stroke="${C.steel}" stroke-width="1.5"/></g>`;
+  s+=`<rect id="eloHit" x="${x0}" y="${y0}" width="${w}" height="${h}" fill="transparent" style="cursor:crosshair"/>`;
+  // architecture column
+  s+=box(342,24,124,44,'C++ client',{size:14})+arrow(404,68,404,88);
+  s+=box(342,88,124,56,'TypeScript REST',{sub:'JWT · sessions',size:14,stroke:C.brass})+arrow(404,144,404,164);
+  s+=box(342,164,124,40,'MongoDB',{size:14});
+  s+=t(404,226,'leaderboards, inventory',{anchor:'middle',size:8});
+  s+=`<text id="eloTxt" x="342" y="258" class="svgt" style="fill:${C.text}" font-size="10"></text><text id="eloTxt2" x="342" y="274" class="svgt" font-size="10"></text>`;
+  fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="ELO expected score curve and service architecture">${s}</svg>`+FIGS_bar(n,'E = 1 / (1 + 10^(−Δ/400)) · K = 32')+`<p class="fig-cap">Move along the curve. A favourite gains little for winning; an underdog gains a lot.</p>`;
+  const svg=fig.querySelector('svg');
+  function set(dd){const e=E(dd);fig.querySelector('#eloL').setAttribute('x1',X(dd));fig.querySelector('#eloL').setAttribute('x2',X(dd));fig.querySelector('#eloC').setAttribute('cx',X(dd));fig.querySelector('#eloC').setAttribute('cy',Y(e));
+    fig.querySelector('#eloTxt').textContent=`Δ = ${dd>0?'+':''}${dd}  E = ${e.toFixed(3)}`;fig.querySelector('#eloTxt2').textContent=`win +${(32*(1-e)).toFixed(1)}  loss −${(32*e).toFixed(1)}`}
+  set(0);
+  fig.querySelector('#eloHit').addEventListener('mousemove',ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());set(Math.round(((p.x-x0)/w*1600-800)/10)*10)});
+ }
+};
+
+
+/* ---------- draw-in animation for SVG figures ---------- */
+function drawIn(root){
+  if(reduceMotion||!root.animate)return;
+  const els=[...root.querySelectorAll('path,line,polyline,polygon,circle,ellipse,rect,text')].slice(0,500);
+  els.forEach((el,i)=>{
+    const delay=Math.min(i*6,900);
+    const fill=el.getAttribute('fill');
+    if(el.tagName==='text'||(fill&&fill!=='none'&&fill!=='transparent')){el.animate([{opacity:0},{opacity:el.getAttribute('opacity')||1}],{duration:600,delay:delay+200,fill:'backwards',easing:'ease-out'});return}
+    let L=0;try{L=el.getTotalLength()}catch(e){}
+    if(!L||L>5000)return;
+    el.animate([{strokeDasharray:L+' '+L,strokeDashoffset:L},{strokeDasharray:L+' '+L,strokeDashoffset:0}],{duration:1100,delay,easing:'cubic-bezier(.2,.7,.15,1)',fill:'backwards'});
+  });
+}
+
+/* ---------- artworks ---------- */
+function artFigure(fig,key){
+  const a=ARTS[key];if(!a)return;
+  fig.innerHTML=`<div class="img-box"><img loading="lazy" src="${a.src}" alt="${esc(a.cap)}"></div><figcaption>${esc(a.cap)}<small>Public domain, via Wikimedia Commons</small></figcaption>`;
+  fig.querySelector('img').onerror=()=>{fig.style.display='none'};
+}
+document.querySelectorAll('figure.art[data-art]').forEach(f=>artFigure(f,f.dataset.art));
+
+/* ---------- TERRAIN ---------- */
+const Terrain=(function(){
+  const cv=document.getElementById('terrain'),ctx=cv.getContext('2d'),readout=document.getElementById('readout');
+  const wells=[[-1.7,-.5,1.15,.72],[1.5,.95,.95,.62],[.35,-1.55,.72,.5],[2.6,-1.25,.62,.45],[-2.5,1.45,.85,.6],[-.2,1.9,.5,.4],[-4.6,-1.8,.9,.7],[4.4,2.2,.8,.6],[3.9,-3.0,.7,.55],[-3.6,3.2,.75,.6],[.8,-3.6,.6,.5],[-5.5,1.0,.6,.5],[5.6,-.4,.7,.55]];
+  const lam=.05;
+  const f=(x,y)=>{let v=.5*lam*(x*x+y*y)+.1*Math.sin(1.4*x+.5)*Math.cos(1.2*y);for(const [cx,cy,a,s] of wells)v-=a*Math.exp(-((x-cx)**2+(y-cy)**2)/(2*s*s));return v};
+  const grad=(x,y)=>{const h=1e-3;return[(f(x+h,y)-f(x-h,y))/(2*h),(f(x,y+h)-f(x,y-h))/(2*h)]};
+  let W=0,H=0,dpr=1,scale=1,layer=null,tracers=[],running=false,built=false;
+  const toWorld=(px,py)=>[(px-W/2)/scale,-(py-H/2)/scale];
+  const toPx=(x,y)=>[W/2+x*scale,H/2-y*scale];
+  function build(){
+    dpr=Math.min(devicePixelRatio||1,1.25);W=cv.clientWidth||Math.round(innerWidth*1.5);H=cv.clientHeight||Math.round(innerHeight*1.5);
+    if(!W||!H){requestAnimationFrame(build);return}
+    built=true;cv.width=W*dpr;cv.height=H*dpr;
+    scale=Math.min(W/1.5/8.2,H/1.5/5.2);
+    layer=document.createElement('canvas');layer.width=W*dpr;layer.height=H*dpr;
+    const g=layer.getContext('2d');g.scale(dpr,dpr);g.fillStyle=C.ink;g.fillRect(0,0,W,H);
+    const cs=7,nx=Math.ceil(W/cs)+1,ny=Math.ceil(H/cs)+1,vals=new Float32Array(nx*ny);let mn=1e9,mx=-1e9;
+    for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const [x,y]=toWorld(i*cs,j*cs);const v=f(x,y);vals[j*nx+i]=v;if(v<mn)mn=v;if(v>mx)mx=v}
+    const tint=document.createElement('canvas');tint.width=nx;tint.height=ny;const tg=tint.getContext('2d'),img=tg.createImageData(nx,ny);
+    for(let k=0;k<nx*ny;k++){const u=(vals[k]-mn)/(mx-mn),d=Math.pow(1-u,2.2);img.data[k*4]=15+d*8;img.data[k*4+1]=23+d*22;img.data[k*4+2]=25+d*30;img.data[k*4+3]=255}
+    tg.putImageData(img,0,0);g.imageSmoothingEnabled=true;g.drawImage(tint,0,0,nx*cs,ny*cs);
+    const gs=scale*.8,cols='ABCDEFGHJKLMNOPQRSTUVWXYZ';
+    g.strokeStyle='rgba(110,155,176,.07)';g.lineWidth=1;g.font='10px "Azeret Mono", monospace';g.fillStyle='rgba(139,148,143,.5)';
+    let ci=0;for(let x=W/2%gs;x<W;x+=gs,ci++){g.beginPath();g.moveTo(x,0);g.lineTo(x,H);g.stroke();g.fillText(cols[ci%cols.length],x+gs/2-3,H*5/6-14)}
+    let ri=1;for(let y=H/2%gs;y<H;y+=gs,ri++){g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();g.fillText(String(ri),W/6+8,y+gs/2+3)}
+    const step=.08,lvl0=Math.ceil(mn/step)*step;
+    for(let L=lvl0,idx=Math.round(lvl0/step);L<mx;L+=step,idx++){
+      const major=idx%5===0;g.strokeStyle=major?'rgba(201,160,100,.42)':'rgba(140,165,160,.17)';g.lineWidth=major?1.1:.7;g.beginPath();
+      for(let j=0;j<ny-1;j++)for(let i=0;i<nx-1;i++){
+        const a=vals[j*nx+i],b=vals[j*nx+i+1],c=vals[(j+1)*nx+i+1],d=vals[(j+1)*nx+i];
+        const code=(a>L?8:0)|(b>L?4:0)|(c>L?2:0)|(d>L?1:0);if(code===0||code===15)continue;
+        const x=i*cs,y=j*cs,lp=(p,q)=>(L-p)/(q-p);
+        const T=[x+cs*lp(a,b),y],R=[x+cs,y+cs*lp(b,c)],B=[x+cs*lp(d,c),y+cs],Lf=[x,y+cs*lp(a,d)];
+        const seg=(p,q)=>{g.moveTo(p[0],p[1]);g.lineTo(q[0],q[1])};
+        switch(code){case 1:case 14:seg(Lf,B);break;case 2:case 13:seg(B,R);break;case 3:case 12:seg(Lf,R);break;case 4:case 11:seg(T,R);break;case 5:seg(Lf,T);seg(B,R);break;case 6:case 9:seg(T,B);break;case 7:case 8:seg(Lf,T);break;case 10:seg(T,R);seg(Lf,B);break}
+      }
+      g.stroke();
+    }
+    g.fillStyle='rgba(218,211,196,.55)';g.font='italic 13px Cormorant, Georgia, serif';
+    for(const [cx,cy] of wells){const [px,py]=toPx(cx,cy);g.fillText(f(cx,cy).toFixed(2),px+5,py-5)}
+    draw();
+  }
+  function descend(x,y){const pts=[[x,y]];let vx=0,vy=0;for(let k=0;k<500;k++){const [gx,gy]=grad(x,y);vx=.82*vx-.06*gx;vy=.82*vy-.06*gy;x+=vx;y+=vy;pts.push([x,y]);if(Math.hypot(gx,gy)<2e-3&&Math.hypot(vx,vy)<1e-3)break}return pts}
+  function launchWorld(x,y){tracers.push({pts:descend(x,y),shown:reduceMotion?9999:1});if(tracers.length>14)tracers.shift();if(!running){running=true;requestAnimationFrame(tick)}}
+  function tick(){let busy=false;for(const tr of tracers){if(tr.shown<tr.pts.length){tr.shown=Math.min(tr.pts.length,tr.shown+3);busy=true}}draw();if(busy)requestAnimationFrame(tick);else running=false}
+  function draw(){
+    if(!layer||!layer.width||!layer.height||!cv.width||!cv.height)return;
+    ctx.setTransform(dpr,0,0,dpr,0,0);ctx.drawImage(layer,0,0,W,H);
+    for(const tr of tracers){
+      const P=tr.pts.slice(0,tr.shown).map(p=>toPx(p[0],p[1]));
+      ctx.strokeStyle=C.brass;ctx.lineWidth=1.4;ctx.setLineDash([5,4]);ctx.beginPath();P.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.setLineDash([]);
+      const s=P[0];ctx.lineWidth=1.2;ctx.strokeRect(s[0]-5,s[1]-5,10,10);ctx.beginPath();ctx.moveTo(s[0]-5,s[1]-5);ctx.lineTo(s[0]+5,s[1]+5);ctx.moveTo(s[0]+5,s[1]-5);ctx.lineTo(s[0]-5,s[1]+5);ctx.stroke();
+      if(tr.shown>=tr.pts.length){const e=P[P.length-1];ctx.fillStyle=C.ox;ctx.beginPath();ctx.arc(e[0],e[1],4.5,0,7);ctx.fill();ctx.strokeStyle='rgba(165,71,60,.5)';ctx.beginPath();ctx.arc(e[0],e[1],10,0,7);ctx.stroke();ctx.strokeStyle=C.brass}
+    }
+  }
+  const local=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]};
+  cv.addEventListener('click',e=>{const [px,py]=local(e);launchWorld(...toWorld(px,py))});
+  cv.addEventListener('mousemove',e=>{
+    const [px,py]=local(e),[x,y]=toWorld(px,py),[gx,gy]=grad(x,y),gs=scale*.8,cols='ABCDEFGHJKLMNOPQRSTUVWXYZ';
+    const ci=Math.floor((px-W/2%gs)/gs)+1,ri=Math.floor((py-H/2%gs)/gs)+2;
+    readout.innerHTML=`Grid ${cols[Math.max(0,ci)%cols.length]}${Math.max(1,ri)} &nbsp; (${x.toFixed(2)}, ${y.toFixed(2)})<br>f = ${f(x,y).toFixed(3)} &nbsp; ‖∇f‖ = ${Math.hypot(gx,gy).toFixed(3)}`;
+  });
+  let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const old=tracers.map(t=>t.pts[0]);tracers=[];build();old.forEach(p=>launchWorld(p[0],p[1]))},200)});
+  build();
+  if(window.ResizeObserver){let lastW=0,lastH=0;new ResizeObserver(()=>{const w=cv.clientWidth,h=cv.clientHeight;if(w&&h&&(Math.abs(w-lastW)>40||Math.abs(h-lastH)>40)){lastW=w;lastH=h;const old=tracers.map(t=>t.pts[0]);tracers=[];build();old.forEach(p=>launchWorld(p[0],p[1]))}}).observe(cv)}
+  return {launchWorld,randomDescent(){const r=Math.random;launchWorld((r()*2-1)*6,(r()*2-1)*3.8)}};
+})();
+
+/* ---------- HERO NAME LETTERS ---------- */
+(function(){
+  const h=document.getElementById('heroName');if(reduceMotion)return;let i=0;
+  h.innerHTML=[['Aeterni',true],['frigus',false]].map(([w,em])=>{const s=[...w].map(ch=>`<span aria-hidden="true" style="animation-delay:${.35+(i++)*.045}s">${ch}</span>`).join('');return em?`<em>${s}</em>`:s}).join('');
+})();
+[[-3.2,.3],[3.3,2.1],[.9,-2.6]].forEach((p,i)=>setTimeout(()=>Terrain.launchWorld(p[0],p[1]),reduceMotion?0:900+i*450));
+
+/* ---------- ABOUT ---------- */
+const langLabels={
+  en:{home:'§00 home',about:'§01 about',projects:'§02 repos',writing:'§03 writing',poison:'§04 poison',music:'§05 music',tag:'∀x ∈ existence · x remains undefined',desc:'Occasionally, a person.',proof:'Statement: there exists an x such that x = I, where I is fully known.\nProof attempt: let I = self at time t.\nObserve: I(t) ≠ I(t+ε) for any ε > 0.\n∴ I is irrational. QED. · (the statement is still true.)',aboutBody:'The username is accurate. Make of that what you will.'},
+  hi:{home:'§00 मुखपृष्ठ',about:'§01 परिचय',projects:'§02 रेपो',writing:'§03 लेखन',poison:'§04 ज़हर',music:'§05 संगीत',tag:'∀x ∈ अस्तित्व · x अपरिभाषित रहता है',desc:'कभी-कभी, एक इंसान।',proof:'कथन: एक x है जहाँ x = I, और I पूर्णतः ज्ञात है।\nप्रयास: मान लें I = t समय पर स्वयं।\nनिरीक्षण: I(t) ≠ I(t+ε), किसी भी ε > 0 के लिए।\n∴ I अपरिमेय है। QED. · (कथन फिर भी सत्य है।)',aboutBody:'उपनाम सटीक है। जो समझना हो, समझें।'},
+  od:{home:'§00 ମୁଖପୃଷ୍ଠା',about:'§01 ପରିଚୟ',projects:'§02 ରେପୋ',writing:'§03 ଲେଖା',poison:'§04 ବିଷ',music:'§05 ସଙ୍ଗୀତ',tag:'∀x ∈ ଅସ୍ତିତ୍ୱ · x ଅନିର୍ଦ୍ଧାରିତ ରହେ',desc:'ବେଳେବେଳେ ଜଣେ ବ୍ୟକ୍ତି',proof:'ବିବୃତ୍ତି: ଏକ x ଅଛି ଯେଉଁଠି x = I, I ସଂପୂର୍ଣ୍ଣ ଜ୍ଞାତ।\nପ୍ରୟାସ: ଧରିନିଅ I = ସ୍ୱୟଂ ସମୟ t ରେ।\nପର୍ଯ୍ୟବେକ୍ଷଣ: I(t) ≠ I(t+ε)।\n∴ I ଅଯୌକ୍ତିକ। QED.',aboutBody:'ଉପନାମଟି ସଠିକ। ଯାହା ବୁଝିବ, ବୁଝ।'}
+};
+let LANG='en',typeTimer=null;
+function typeProof(){
+  const el=document.getElementById('proof'),txt=langLabels[LANG].proof;clearTimeout(typeTimer);
+  if(reduceMotion){el.innerHTML=esc(txt).replace(/\n/g,'<br>');return}
+  let i=0;const step=()=>{i+=2;el.innerHTML=esc(txt.slice(0,i)).replace(/\n/g,'<br>')+(i<txt.length?'<span class="caret"></span>':'');if(i<txt.length)typeTimer=setTimeout(step,i>0&&txt[i-1]==='\n'?260:22)};step();
+}
+function drawIrr(){
+  const el=document.getElementById('figIrr'),r=.62*Math.SQRT2;let s=grid(20,20,440,240,11,6),d='',px=null;
+  for(let i=0;i<=2600;i++){const tt=i*.012,x=tt%1,y=(tt*r)%1,X=20+x*440,Y=260-y*240;if(px&&(Math.abs(X-px[0])>200||Math.abs(Y-px[1])>120))d+=`M${X.toFixed(1)} ${Y.toFixed(1)}`;else d+=(i?'L':'M')+X.toFixed(1)+' '+Y.toFixed(1);px=[X,Y]}
+  s+=`<path d="${d}" fill="none" stroke="${C.steel}" stroke-width=".7" opacity=".75" id="irrPath"/><circle cx="20" cy="260" r="3.5" fill="${C.brass}"/>`+t(28,254,'I(0)',{fill:C.brass})+t(460,15,'winding ratio √2 ∉ ℚ',{anchor:'end'});
+  el.innerHTML=s;
+  const p=el.querySelector('#irrPath');if(!reduceMotion&&p.animate){const L=p.getTotalLength();p.animate([{strokeDasharray:L+' '+L,strokeDashoffset:L},{strokeDasharray:L+' '+L,strokeDashoffset:0}],{duration:5200,easing:'cubic-bezier(.3,.1,.2,1)'})}
+}
+document.getElementById('irrBtn').onclick=drawIrr;
+
+/* ---------- REPOS (data/repos.json, written at deploy time) ---------- */
+let currentPlate=0,REPOS=[];
+const CUR={};PROJECTS.forEach(p=>CUR[p.repo.split('/').pop().toLowerCase()]=p); // hand-made figures attach by repo name
+const FLAGS=[['tests','Tests'],['ci','CI'],['docker','Container'],['iac','IaC'],['docs','Docs']];
+FIGS.auto=function(fig,n,r){
+  const P=[C.brass,C.steel,C.brassD,C.ox,C.faint,C.muted],cut=(s,k)=>s.length>k?s.slice(0,k-1)+'…':s;
+  let s=t(16,24,'anatomy of the repository',{cls:'svgs',size:16,italic:true});
+  s+=box(16,120,96,44,cut(r.name,12),{sub:'root',size:13,stroke:C.brass});
+  const D=r.dirs.slice(0,6),mx=Math.max(1,...D.map(d=>d[1]));
+  D.forEach(([d,c],i)=>{const y=44+i*36;s+=arrow(112,142,170,y+13)+box(170,y,130,26,cut(d,15),{size:13})+`<rect x="170" y="${y+24}" width="${(130*c/mx).toFixed(1)}" height="2" fill="${C.brass}"/>`+t(306,y+17,c,{size:9})});
+  if(r.dirs.length>6)s+=t(170,266,`+ ${r.dirs.length-6} more`,{size:9});
+  const L=Object.entries(r.languages),tot=L.reduce((a,b)=>a+b[1],0)||1;let x=330;
+  s+=t(330,44,'languages',{cls:'svgs',size:14,italic:true});
+  L.slice(0,6).forEach(([l,b],i)=>{const w=136*b/tot;s+=`<rect x="${x.toFixed(1)}" y="52" width="${w.toFixed(1)}" height="12" fill="${P[i]}"/>`;x+=w});
+  L.slice(0,5).forEach(([l,b],i)=>{s+=`<rect x="330" y="${78+i*16}" width="8" height="8" fill="${P[i]}"/>`+t(344,86+i*16,`${l} ${Math.round(100*b/tot)}%`,{fill:C.text,size:9.5})});
+  s+=t(330,196,'commits per week, one year',{cls:'svgs',size:14,italic:true});
+  const a=r.activity;
+  if(a&&a.some(v=>v)){const m=Math.max(...a);s+=`<line x1="330" y1="250" x2="466" y2="250" stroke="${C.rule2}"/><path d="${a.map((v,i)=>(i?'L':'M')+(330+i*136/(a.length-1)).toFixed(1)+' '+(250-v/m*40).toFixed(1)).join('')}" fill="none" stroke="${C.brass}" stroke-width="1.3"/>`+t(466,266,'peak '+m,{anchor:'end'})}
+  else s+=t(330,232,'no recent activity',{});
+  FLAGS.forEach(([k,l],i)=>{const x0=20+i*62,on=r.flags[k];s+=`<circle cx="${x0}" cy="288" r="3.5" fill="${on?C.brass:'none'}" stroke="${on?C.brass:C.rule2}"/>`+t(x0+8,291,l.toLowerCase(),{size:9})});
+  fig.innerHTML=`<svg viewBox="0 0 480 300" role="img" aria-label="Repository anatomy: folders, languages, weekly commits">${s}</svg>`+FIGS_bar(n,`${esc(r.name)} · ${r.files} files`)+`<p class="fig-cap">Drawn at deploy time from the file tree, language bytes and commit history. Nothing here is hand-edited.</p>`;
+};
+function buildMatrix(){
+  const m=document.getElementById('matrix');
+  let h='<thead><tr><th scope="col">Repository</th><th scope="col">Language</th>'+FLAGS.map(f=>`<th scope="col">${f[1]}</th>`).join('')+'<th scope="col">Pages</th></tr></thead><tbody>';
+  REPOS.forEach((p,i)=>{const r=p.r;h+=`<tr data-i="${i}" tabindex="0"><th scope="row">${esc(p.name)}</th><td class="lang">${esc(r.language||'')}</td>`+FLAGS.map(f=>`<td>${r.flags[f[0]]?'<span class="dot"></span>':''}</td>`).join('')+`<td>${r.pages?'<span class="dot"></span>':''}</td></tr>`});
+  m.innerHTML=h+'</tbody>';
+  m.querySelectorAll('tr[data-i]').forEach(tr=>{const go=()=>showPlate(+tr.dataset.i,true);tr.onclick=go;tr.onkeydown=e=>{if(e.key==='Enter')go()}});
+}
+fetch('data/repos.json').then(x=>x.json()).then(list=>{
+  REPOS=list.map(r=>{const c=CUR[r.name.toLowerCase()];return {r,c,name:c?c.name:r.name,kind:c?c.kind:[r.language].concat(r.topics.slice(0,2)).filter(Boolean).join(' · '),body:c?c.body:(r.description||'No description yet.'),plain:c?c.plain:'',facts:c?c.facts:r.topics.slice(0,8)}});
+  document.getElementById('repoIntro').textContent=REPOS.length?`${REPOS.length} public repositories, read from GitHub at deploy time. Select a row to open its plate.`:'No public repositories yet.';
+  buildMatrix();
+  if(!document.querySelector('#plateHost article'))showPlate(0,false);
+}).catch(()=>{document.getElementById('repoIntro').textContent='The repository list is built at deploy time and is not available when the file is opened locally.'});
+function showPlate(i,scroll){
+  if(!REPOS.length)return;
+  currentPlate=(i+REPOS.length)%REPOS.length;const p=REPOS[currentPlate],r=p.r,host=document.getElementById('plateHost');
+  document.querySelectorAll('#matrix tr[data-i]').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.i===currentPlate));
+  const nx=r.name.toLowerCase()==='data-craft-nexus'?'Enter the Nexus':'Live site';
+  const links=(r.site?`<a class="repo-link primary" href="${esc(r.site)}" target="_blank" rel="noopener">${nx} ↗</a>`:'')+`<a class="repo-link" href="${esc(r.url)}" target="_blank" rel="noopener">Repository ↗</a>`;
+  const prev=REPOS[(currentPlate-1+REPOS.length)%REPOS.length].name,next=REPOS[(currentPlate+1)%REPOS.length].name;
+  host.innerHTML=`<article class="plate enter"><div><div class="plate-kind">Plate ${currentPlate+1} of ${REPOS.length} · ${esc(p.kind)}</div><h3>${esc(p.name)}</h3><p>${p.c?p.body:esc(p.body)}</p>${p.plain?`<p class="plain">${p.plain}</p>`:''}<div class="facts">${p.facts.map(f=>`<span>${esc(f)}</span>`).join('')}</div><div class="links-row">${links}</div><div class="plate-nav"><button data-d="-1">← ${esc(prev)}</button><button data-d="1">${esc(next)} →</button></div></div><figure class="fig"></figure></article>`;
+  const fig=host.querySelector('figure');
+  if(p.c)FIGS[p.c.fig](fig,currentPlate+1);else FIGS.auto(fig,currentPlate+1,r);
+  drawIn(fig);
+  host.querySelectorAll('.plate-nav button').forEach(b=>b.onclick=()=>showPlate(currentPlate+ +b.dataset.d,false));
+  if(scroll)host.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'start'});
+}
+
+/* ---------- WRITING (data/essays.json + writing/*.html, rendered from writing/*.md at deploy time) ---------- */
+const Writing=(function(){
+  const list=document.getElementById('essays'),rd=document.getElementById('reader');let E=[];const G=fetch('data/config.json').then(r=>r.json()).then(c=>c.giscus).catch(()=>null);
+  const ready=fetch('data/essays.json').then(r=>r.json()).then(j=>{E=j;
+    list.innerHTML=E.map((e,i)=>`<li class="essay"><a href="#writing/${e.slug}"><span class="en">${String(i+1).padStart(2,'0')}</span><div><div class="et">${esc(e.title)}</div><div class="ep">${esc(e.summary)}</div><div class="em">${esc([e.tags,e.date,e.hasBody?'':'on medium'].filter(Boolean).join(' · '))}</div></div></a></li>`).join('')
+  }).catch(()=>{list.innerHTML='<li class="essay"><div class="ep" style="padding:1.35rem 0">The essay index is built at deploy time and is not available when the file is opened locally.</div></li>'});
+  async function open(slug){
+    await ready;if(curL!=='en')await gtSet('en');const e=E.find(x=>x.slug===slug);
+    if(!e){rd.hidden=true;list.hidden=false;return}
+    let body='';if(e.hasBody){try{body=await(await fetch(`writing/${e.slug}.html`)).text()}catch(_){}}
+    const med=e.medium?`<p class="r-foot"><a class="repo-link" href="${esc(e.medium)}" target="_blank" rel="noopener">${e.hasBody?'Originally on Medium':'Read on Medium'} ↗</a></p>`:'';
+    rd.innerHTML=`<a class="fig-btn back" href="#writing">← all writing</a><h3>${esc(e.title)}</h3><div class="r-meta">${esc([e.tags,e.date].filter(Boolean).join(' · '))}</div>${langBar()}<div class="prose">${body||`<p>${esc(e.summary)}</p>`}</div>${med}<section class="comments" id="comments"><h4>Comments</h4></section>`;
+    list.hidden=true;rd.hidden=false;document.title=`${e.title} · Aeternifrigus`;
+    mount(e,await G);bindLang();
+  }
+  function mount(e,g){ // comments and threaded replies via giscus (GitHub Discussions)
+    const box=document.getElementById('comments');if(!box)return;
+    if(!g){box.insertAdjacentHTML('beforeend','<p style="color:var(--muted);font-style:italic">Comments open once giscus is configured in site.config.json.</p>');return}
+    const s=document.createElement('script');s.src='https://giscus.app/client.js';s.async=true;s.crossOrigin='anonymous';
+    Object.entries({repo:g.repo,'repo-id':g.repoId,category:g.category,'category-id':g.categoryId,mapping:'specific',term:'writing/'+e.slug,strict:'0','reactions-enabled':'1','emit-metadata':'0','input-position':'top',theme:'transparent_dark',lang:'en',loading:'lazy'}).forEach(([k,v])=>s.setAttribute('data-'+k,v));
+    box.appendChild(s);
+  }
+  // reader translation: Google's website translator, driven from our own dropdown
+  const TL=[['en','English (original)'],['hi','हिन्दी'],['or','ଓଡ଼ିଆ'],['bn','বাংলা'],['ta','தமிழ்'],['te','తెలుగు'],['ml','മലയാളം'],['ur','اردو'],['es','Español'],['fr','Français'],['de','Deutsch'],['ru','Русский'],['zh-CN','中文'],['ja','日本語'],['ar','العربية']];
+  let curL='en',gt=null;
+  const langBar=()=>`<div class="r-lang" translate="no"><label for="rlang">Read in</label><select id="rlang">${TL.map(l=>`<option value="${l[0]}"${l[0]===curL?' selected':''}>${l[1]}</option>`).join('')}</select><small>machine translation by Google</small></div>`;
+  function loadGT(){return gt||(gt=new Promise(res=>{window.gtInit=()=>{new google.translate.TranslateElement({pageLanguage:'en',includedLanguages:TL.map(l=>l[0]).join(','),autoDisplay:false},'gt_el');res()};const s=document.createElement('script');s.src='https://translate.google.com/translate_a/element.js?cb=gtInit';s.onerror=()=>res();document.head.appendChild(s)}))}
+  async function gtSet(code){curL=code;if(code==='en'&&!gt)return;await loadGT();let c=null;for(let i=0;i<50&&!(c=document.querySelector('select.goog-te-combo'));i++)await new Promise(r=>setTimeout(r,100));if(c){c.value=code;c.dispatchEvent(new Event('change'))}}
+  function bindLang(){const el=document.getElementById('rlang');if(el)el.onchange=()=>gtSet(el.value)}
+  return {open};
+})();
+
+/* ---------- POISON: shelves, books, anime ---------- */
+const SHELVES=[
+  {key:'stoic',label:'Fiction, stoic',note:'Preferred. A small sample, always hunting for more.',items:DATA.books[0].items},
+  {key:'broad',label:'Fiction, broader',note:'Snacking. A small sample, always hunting for more.',items:DATA.books[1].items},
+  {key:'nonfic',label:'Non-fiction',note:'No self-help, no biographies.',items:DATA.books[2].items},
+  {key:'anime',label:'Anime',note:'A portrait of taste, not a complete list.',items:DATA.anime}
+];
+let shelfIdx=0,shelfSort='list',shelfOrder=[];
+function hashStr(s){let h=2166136261;for(const ch of s){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function coverSVG(title,author,motif,big){
+  const r=mulberry32(hashStr(title));let bg='';
+  const cx=20+r()*80,cy=30+r()*100;for(let k=1;k<=7;k++){const rx=k*(9+r()*4),ry=k*(7+r()*4);bg+=`<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" transform="rotate(${(r()*40-20).toFixed(0)} ${cx.toFixed(0)} ${cy.toFixed(0)})" fill="none" stroke="${k%5===0?'rgba(201,160,100,.22)':'rgba(140,165,160,.1)'}" stroke-width=".6"/>`}
+  const m=MOTIF[motif]||MOTIF.pages;
+  return `<svg viewBox="0 0 120 160" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="120" height="160" fill="#111B1E"/>${bg}<rect x="6" y="6" width="108" height="148" fill="none" stroke="rgba(201,160,100,.35)" stroke-width=".6"/><rect x="9" y="9" width="102" height="142" fill="none" stroke="rgba(201,160,100,.18)" stroke-width=".4"/><g class="motif-draw" transform="translate(28 30) scale(.64)" fill="none" stroke="${C.brass}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${m}</g>${big?'':`<text x="60" y="118" text-anchor="middle" style="font-family:Cormorant,Georgia,serif;fill:#DAD3C4" font-size="9.5">${esc(title.length>26?title.slice(0,24)+'…':title)}</text><text x="60" y="130" text-anchor="middle" style="font-family:'Azeret Mono',monospace;fill:#8B948F" font-size="4.6">${esc(author.toUpperCase().slice(0,30))}</text>`}</svg>`;
+}
+function coverHTML(title,author,big){
+  const meta=BOOKMETA[title],mk=meta?meta[4]:'pages';
+  if(mk.startsWith('art:')){const a=ARTS[mk.slice(4)];return `<img loading="lazy" src="${a.src}" alt="${esc(a.cap)}" data-fallback="${esc(title)}">`}
+  return coverSVG(title,author,mk,big);
+}
+function wireFallbacks(root){root.querySelectorAll('img[data-fallback]').forEach(img=>img.onerror=()=>{const t=img.dataset.fallback;img.outerHTML=coverSVG(t,'','frame',false)})}
+function yearX(y){return y<1500?30+(y+500)/2000*190:220+(y-1500)/530*750}
+(function(){
+  const tabs=document.getElementById('shelfTabs');
+  SHELVES.forEach((s,i)=>{const b=document.createElement('button');b.role='tab';b.innerHTML=`${s.label}<small>${s.items.length}</small>`;b.onclick=()=>showShelf(i);tabs.appendChild(b)});
+})();
+function moveInk(container,btn){const ink=container.querySelector('.ink');if(!ink||!btn)return;ink.style.left=btn.offsetLeft+'px';ink.style.width=(btn.offsetWidth-parseFloat(getComputedStyle(btn).marginRight||0))+'px'}
+function showShelf(i){
+  shelfIdx=i;const s=SHELVES[i],host=document.getElementById('shelfHost'),tabs=document.getElementById('shelfTabs');
+  tabs.querySelectorAll('button').forEach((b,k)=>b.setAttribute('aria-selected',k===i));moveInk(tabs,tabs.querySelectorAll('button')[i]);
+  if(s.key==='anime'){
+    host.innerHTML=`<div class="shelf-intro"><p>${s.note}</p></div><ul class="anime-grid">${s.items.map((a,k)=>`<li style="animation:rise .7s ${k*50}ms var(--ease) both"><b>${String(k+1).padStart(2,'0')}</b>${esc(a)}</li>`).join('')}</ul>`;return;
+  }
+  let items=s.items.map(([ti,au],k)=>({ti,au,k,meta:BOOKMETA[ti]||['',0,'','','pages']}));
+  if(shelfSort==='year')items.sort((a,b)=>a.meta[1]-b.meta[1]);
+  shelfOrder=items;
+  // timeline
+  let tl=`<svg viewBox="0 0 1000 86" role="img" aria-label="Timeline of when each book was written">`;
+  tl+=`<line x1="30" y1="52" x2="970" y2="52" stroke="${C.rule2}"/><line x1="220" y1="40" x2="220" y2="64" stroke="${C.faint}" stroke-dasharray="2 3"/>`;
+  [[-500,'500 BCE'],[500,'500'],[1500,'1500'],[1700,'1700'],[1800,'1800'],[1900,'1900'],[2000,'2000']].forEach(([y,l])=>tl+=`<line x1="${yearX(y)}" y1="49" x2="${yearX(y)}" y2="55" stroke="${C.muted}"/>`+t(yearX(y),74,l,{anchor:'middle',size:9}));
+  tl+=t(30,20,'when they were written',{cls:'svgs',size:14,italic:true})+t(970,20,'scale compressed before 1500',{anchor:'end',size:8.5});
+  const stackCount={};
+  items.forEach(it=>{const x=yearX(it.meta[1]),key=Math.round(x/8);stackCount[key]=(stackCount[key]||0)+1;const y=52-(stackCount[key]-1)*7;tl+=`<circle class="bk" data-k="${it.k}" cx="${x.toFixed(1)}" cy="${y}" r="3.4" fill="${C.steel}"><title>${esc(it.ti)}, ${esc(it.meta[0])}</title></circle>`});
+  tl+='</svg>';
+  host.innerHTML=`<div class="shelf-intro"><p>${s.note} Select a book for its story, year and field.</p><div class="sorter">Order <button aria-pressed="${shelfSort==='list'}" data-s="list">as kept</button><button aria-pressed="${shelfSort==='year'}" data-s="year">by year</button></div></div><div class="timeline">${tl}</div><div class="book-grid">${items.map((it,n)=>`<button class="book" data-k="${it.k}" data-n="${n}" style="animation:rise .7s ${Math.min(n*35,900)}ms var(--ease) both"><span class="cover">${coverHTML(it.ti,it.au,true)}<span class="glint"></span></span><span class="bt">${esc(it.ti)}</span><span class="ba">${esc(it.au)} <span class="by">${esc(it.meta[0])}</span></span></button>`).join('')}</div>`;
+  wireFallbacks(host);
+  host.querySelectorAll('.sorter button').forEach(b=>b.onclick=()=>{shelfSort=b.dataset.s;showShelf(shelfIdx)});
+  const books=host.querySelectorAll('.book'),dots=host.querySelectorAll('circle.bk');
+  const hot=(k,on)=>{host.querySelectorAll(`[data-k="${k}"]`).forEach(el=>{el.classList.toggle('hot',on);if(el.tagName==='circle')el.setAttribute('r',on?6:3.4)})};
+  books.forEach(b=>{
+    b.onmouseenter=()=>hot(b.dataset.k,true);b.onmouseleave=()=>{hot(b.dataset.k,false);b.querySelector('.cover').style.transform=''};
+    b.onmousemove=e=>{if(reduceMotion)return;const r=b.querySelector('.cover').getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;const c=b.querySelector('.cover');c.style.transform=`rotateY(${(x-.5)*14}deg) rotateX(${(.5-y)*14}deg)`;c.style.setProperty('--gx',x*100+'%');c.style.setProperty('--gy',y*100+'%')};
+    b.onclick=()=>openBook(+b.dataset.n);
+  });
+  dots.forEach(d=>{d.onmouseenter=()=>hot(d.dataset.k,true);d.onmouseleave=()=>hot(d.dataset.k,false);d.onclick=()=>{const n=[...books].findIndex(b=>b.dataset.k===d.dataset.k);openBook(n)}});
+  // ink-draw motifs as cards enter view
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){const g=e.target.querySelector('.motif-draw');if(g)g.querySelectorAll('*').forEach(el=>{let L=300;try{L=Math.ceil(el.getTotalLength())}catch(_){};el.style.setProperty('--len',L)});e.target.classList.add('drawn');io.unobserve(e.target)}}),{threshold:.2});
+  if(reduceMotion)books.forEach(b=>b.classList.add('drawn'));else books.forEach(b=>io.observe(b));
+}
+let drawerN=0;
+function openBook(n){
+  drawerN=(n+shelfOrder.length)%shelfOrder.length;const it=shelfOrder[drawerN],m=it.meta,dr=document.getElementById('drawer');
+  const isArt=m[4].startsWith('art:'),credit=isArt?`<div class="dr-credit">Artwork: ${esc(ARTS[m[4].slice(4)].cap)} Public domain, via Wikimedia Commons.</div>`:`<div class="dr-credit">Engraved motif drawn for this site.</div>`;
+  dr.innerHTML=`<div class="dr-top"><span>${esc(SHELVES[shelfIdx].label)} · ${drawerN+1} of ${shelfOrder.length}</span><button aria-label="Close" id="drClose">✕</button></div><div class="dr-art">${coverHTML(it.ti,it.au,true)}</div><div class="dr-field">${esc(m[2])}</div><h4>${esc(it.ti)}</h4><div class="dr-author">${esc(it.au)}</div><div class="dr-year">Written ${esc(m[0])}</div><p class="dr-desc">${esc(m[3])}</p>${credit}<div class="dr-nav"><button id="drPrev">← previous</button><button id="drNext">next →</button></div>`;
+  wireFallbacks(dr);
+  const g=dr.querySelector('.motif-draw');if(g&&!reduceMotion){g.querySelectorAll('*').forEach(el=>{let L=300;try{L=Math.ceil(el.getTotalLength())}catch(_){};el.animate([{strokeDasharray:L+' '+L,strokeDashoffset:L},{strokeDasharray:L+' '+L,strokeDashoffset:0}],{duration:1500,easing:'cubic-bezier(.2,.7,.15,1)'})})}
+  dr.querySelector('#drClose').onclick=closeBook;dr.querySelector('#drPrev').onclick=()=>openBook(drawerN-1);dr.querySelector('#drNext').onclick=()=>openBook(drawerN+1);
+  document.body.classList.add('drawer-open');dr.setAttribute('aria-hidden','false');dr.querySelector('#drClose').focus({preventScroll:true});
+}
+function closeBook(){document.body.classList.remove('drawer-open');document.getElementById('drawer').setAttribute('aria-hidden','true')}
+document.getElementById('drawerShade').onclick=closeBook;
+
+/* ---------- MUSIC DECK ---------- */
+const Deck=(function(){
+  let crate=4,cur=null,query='';
+  const cratesEl=document.getElementById('crates'),tracksEl=document.getElementById('tracks'),countEl=document.getElementById('trackCount'),search=document.getElementById('trackSearch');
+  const platter=document.getElementById('platter'),arm=document.getElementById('tonearm');
+  let gro='';for(let r=52;r<126;r+=3.2)gro+=`<circle cx="150" cy="150" r="${r}" fill="none" stroke="rgba(218,211,196,${r%9<3?.07:.035})" stroke-width=".6"/>`;document.getElementById('grooves').innerHTML=gro;
+  const total=DATA.music.reduce((s,m)=>s+m.items.length,0);document.getElementById('musicNote').textContent=`${total} records in ${DATA.music.length} crates`;
+  cratesEl.innerHTML=DATA.music.map((m,i)=>`<li><button data-i="${i}" aria-pressed="false">${esc(m.t)}<span>${m.items.length}</span></button></li>`).join('');
+  cratesEl.querySelectorAll('button').forEach(b=>b.onclick=()=>{crate=+b.dataset.i;query='';search.value='';render()});
+  search.oninput=()=>{query=search.value.trim().toLowerCase();render()};
+  function rows(){
+    if(query){const out=[];DATA.music.forEach((m,ci)=>m.items.forEach(([ti,ar],ti_)=>{if((ti+' '+ar).toLowerCase().includes(query))out.push([ci,ti_])}));return out}
+    return DATA.music[crate].items.map((_,i)=>[crate,i]);
+  }
+  function render(){
+    cratesEl.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',!query&&+b.dataset.i===crate));
+    const R=rows();countEl.textContent=query?`${R.length} found`:`${R.length} records`;
+    tracksEl.innerHTML=R.length?R.map(([ci,i],n)=>{const [ti,ar]=DATA.music[ci].items[i];const on=cur&&cur[0]===ci&&cur[1]===i;return `<li><button class="${on?'on':''}" data-c="${ci}" data-i="${i}"><b>${i+1}</b><span class="tt">${esc(ti)}<small>${esc(ar)}${query?`<i>${esc(DATA.music[ci].t)}</i>`:''}</small></span></button></li>`}).join(''):`<li style="padding:1.2rem 1.1rem;color:var(--muted);font-style:italic">No record matches that search. Try an artist or a single word from a title.</li>`;
+    tracksEl.querySelectorAll('button').forEach(b=>b.onclick=()=>play(+b.dataset.c,+b.dataset.i));
+  }
+  function play(ci,i,fromDraw){
+    cur=[ci,i];const [ti,ar]=DATA.music[ci].items[i];
+    if(!query&&crate!==ci){crate=ci}
+    render();
+    const btn=tracksEl.querySelector(`button[data-c="${ci}"][data-i="${i}"]`);if(btn)btn.scrollIntoView({block:'nearest',behavior:reduceMotion?'auto':'smooth'});
+    document.getElementById('lblT').textContent=ti.length>18?ti.slice(0,17)+'…':ti;
+    document.getElementById('lblA').textContent=(ar.length>30?ar.slice(0,29)+'…':ar).toUpperCase();
+    document.getElementById('now').innerHTML=`<div class="np-k">${esc(DATA.music[ci].t)} · record ${i+1}</div><div class="np-t">${esc(ti)}</div><div class="np-a">${esc(ar)}</div>`;
+    document.getElementById('ytBtn').href='https://www.youtube.com/results?search_query='+encodeURIComponent(ti+' '+ar);
+    arm.classList.remove('down');platter.classList.remove('spin');void platter.getBoundingClientRect();
+    setTimeout(()=>{arm.classList.add('down');platter.classList.add('spin')},reduceMotion?0:180);
+  }
+  document.getElementById('drawBtn').onclick=()=>{
+    query='';search.value='';const ci=Math.floor(Math.random()*DATA.music.length),i=Math.floor(Math.random()*DATA.music[ci].items.length);
+    crate=ci;render();if(reduceMotion)return play(ci,i);
+    const btns=[...tracksEl.querySelectorAll('button')];let k=0;const n=14;
+    const flick=()=>{btns.forEach(b=>b.classList.remove('flick'));if(k<n){const b=btns[Math.floor(Math.random()*btns.length)];b.classList.add('flick');b.scrollIntoView({block:'nearest'});k++;setTimeout(flick,45+k*6)}else play(ci,i,true)};flick();
+  };
+  const step=d=>{if(!cur)return play(crate,0);const len=DATA.music[cur[0]].items.length;play(cur[0],(cur[1]+d+len)%len)};
+  document.getElementById('prevBtn').onclick=()=>step(-1);document.getElementById('nextBtn').onclick=()=>step(1);
+  document.getElementById('stopBtn').onclick=()=>{arm.classList.remove('down');platter.classList.remove('spin')};
+  render();
+  return {render};
+})();
+
+/* ---------- ROUTER ---------- */
+const ORDER=['home','about','projects','writing','poison','music'];
+const TITLES={home:'Aeternifrigus',about:'About',projects:'Repos',writing:'Writing',poison:'Poison',music:'Music'};
+const visited={};
+function buildPagers(){
+  document.querySelectorAll('[data-pager]').forEach(p=>{
+    const v=p.closest('.view').dataset.view,i=ORDER.indexOf(v),pv=ORDER[(i-1+ORDER.length)%ORDER.length],nx=ORDER[(i+1)%ORDER.length];
+    p.innerHTML=`<button data-go="${pv}"><span>← previous sheet</span><strong>${TITLES[pv]}</strong></button><span class="keys">← → keys change sheets</span><button data-go="${nx}"><span>next sheet →</span><strong>${TITLES[nx]}</strong></button>`;
+    p.querySelectorAll('button').forEach(b=>b.onclick=()=>{navTo(b.dataset.go)});
+  });
+}
+function go(view){
+  const sub=String(view||'').split('/')[1];view=String(view||'').split('/')[0];
+  if(!ORDER.includes(view))view='home';
+  const prevView=document.body.dataset.view;
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.dataset.view===view));
+  document.body.dataset.view=view;window.scrollTo(0,0);closeBook();
+  document.querySelectorAll('.view.active .st').forEach(st=>[...st.children].forEach((c,i)=>c.style.setProperty('--i',i)));
+  if(prevView!==view&&!reduceMotion){const w=document.getElementById('wipe');w.classList.remove('go');void w.offsetWidth;w.classList.add('go');if(view!=='home')setTimeout(()=>Terrain.randomDescent(),300)}
+  const links=[...document.querySelectorAll('#navSections a')],ink=document.getElementById('navInk');
+  links.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+view));
+  const on=links.find(a=>a.classList.contains('on'));if(on){ink.style.left=on.offsetLeft+'px';ink.style.width=on.offsetWidth+'px';ink.style.opacity=1;try{on.scrollIntoView({block:'nearest',inline:'nearest'})}catch(_){}}else ink.style.opacity=0;
+  document.title=view==='home'?'Aeternifrigus':`${TITLES[view]} · Aeternifrigus`;
+  if(view==='about'){typeProof();if(!visited.about)drawIrr()}
+  if(view==='projects'){if(!visited.projects)showPlate(0,false);else{const f=document.querySelector('#plateHost figure');if(f)drawIn(f)}}
+  if(view==='poison'){if(!visited.poison)showShelf(0);else moveInk(document.getElementById('shelfTabs'),document.querySelectorAll('#shelfTabs button')[shelfIdx])}
+  if(view==='writing')Writing.open(sub);
+  visited[view]=true;
+}
+function navTo(v){go(v);try{history.replaceState(null,'','#'+v)}catch(_){}}
+document.addEventListener('click',e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const v=a.getAttribute('href').slice(1);if(!ORDER.includes(v))return;e.preventDefault();closeMobileMenu();navTo(v)});
+addEventListener('hashchange',()=>go(location.hash.slice(1)));
+addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeBook();closeMobileMenu();return}
+  if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(document.body.classList.contains('drawer-open')){if(e.key==='ArrowRight')openBook(drawerN+1);if(e.key==='ArrowLeft')openBook(drawerN-1);return}
+  const i=ORDER.indexOf(document.body.dataset.view);
+  if(e.key==='ArrowRight')navTo(ORDER[(i+1)%ORDER.length]);
+  if(e.key==='ArrowLeft')navTo(ORDER[(i-1+ORDER.length)%ORDER.length]);
+});
+addEventListener('resize',()=>{const on=document.querySelector('#navSections a.on'),ink=document.getElementById('navInk');if(on){ink.style.left=on.offsetLeft+'px';ink.style.width=on.offsetWidth+'px'}if(document.body.dataset.view==='poison')moveInk(document.getElementById('shelfTabs'),document.querySelectorAll('#shelfTabs button')[shelfIdx])});
+
+/* ---------- LANGUAGE, MENU ---------- */
+function openMobileMenu(){document.getElementById('mobileMenu').classList.add('open')}
+function closeMobileMenu(){document.getElementById('mobileMenu').classList.remove('open')}
+function setLang(code,btn){
+  LANG=code;document.querySelectorAll('.lang-switch button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  const l=langLabels[code],keys=['about','projects','writing','poison','music'];
+  document.querySelectorAll('#navSections a').forEach(a=>a.textContent=l[a.dataset.k]);
+  document.querySelectorAll('.mobile-menu a').forEach((a,i)=>{if(i>0)a.textContent=l[keys[i-1]]});
+  document.querySelector('.hero-tag').textContent=l.tag;document.querySelector('.hero-desc').textContent=l.desc;
+  document.getElementById('aboutBody').textContent=l.aboutBody;
+  if(document.body.dataset.view==='about')typeProof();else document.getElementById('proof').innerHTML=esc(l.proof).replace(/\n/g,'<br>');
+  document.documentElement.lang=code==='od'?'or':code;
+  const on=document.querySelector('#navSections a.on');if(on){const ink=document.getElementById('navInk');ink.style.left=on.offsetLeft+'px';ink.style.width=on.offsetWidth+'px'}
+}
+
+buildPagers();
+go(location.hash.slice(1)||'home');
+</script>
+</body>
+</html>
